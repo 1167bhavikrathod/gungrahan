@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Sparkles,
   FileText,
   LogOut,
   ChevronDown,
@@ -15,6 +14,7 @@ import {
   Trophy,
   Target,
 } from 'lucide-react';
+import TilakChandlo from '@/components/TilakChandlo';
 import { getFirstGrapheme } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 
@@ -59,13 +59,9 @@ export default function StickyHeader() {
         {/* Left: Brand Block */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <div
-            className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white shadow-sm border border-amber-300/40 ${
-              theme.isBal
-                ? 'bg-gradient-to-br from-blue-700 to-indigo-800'
-                : 'bg-gradient-to-br from-rose-600 to-pink-700'
-            }`}
+            className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white shadow-sm border border-amber-300/40 bg-white/80`}
           >
-            <Sparkles className="w-5 h-5 text-amber-300 transition-transform group-hover:rotate-12" />
+            <TilakChandlo className="w-5 h-5 transition-transform group-hover:scale-110" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -186,7 +182,7 @@ export default function StickyHeader() {
                     className="flex items-center gap-2.5 px-4 py-2.5 text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition"
                   >
                     <FileText className="w-4 h-4 text-amber-600" />
-                    <span>📄 બાપાના પત્ર માટે રિપોર્ટ (PDF)</span>
+                    <span>બાપાનો પત્ર અને રિપોર્ટ</span>
                   </Link>
 
                   <button
@@ -197,7 +193,7 @@ export default function StickyHeader() {
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-rose-600 hover:bg-rose-50 transition text-left font-bold"
                   >
                     <LogOut className="w-4 h-4 text-rose-500" />
-                    <span>લોગઆઉટ (નામ બદલો)</span>
+                    <span>નામ બદલો / લોગઆઉટ</span>
                   </button>
                 </div>
               </div>

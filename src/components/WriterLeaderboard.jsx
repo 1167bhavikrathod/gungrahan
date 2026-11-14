@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Trophy, ChevronDown, ChevronUp, Sparkles, Award } from 'lucide-react';
+import { Trophy, ChevronDown, ChevronUp, Award } from 'lucide-react';
 import { getNextBadgeMotivation } from '@/lib/utils';
 
 export default function WriterLeaderboard({
@@ -37,14 +37,14 @@ export default function WriterLeaderboard({
             <Trophy className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900 font-gujarati flex items-center gap-1.5">
+            <h2 className="text-base font-bold text-stone-900 font-gujarati flex items-center gap-1.5">
               ગુણ લેખક લીડરબોર્ડ
-              <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">
-                Writer-First
+              <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-bold">
+                ગુણના ભિખારી
               </span>
             </h2>
-            <p className="text-[11px] text-slate-500 font-gujarati">
-              જેણે સૌથી વધુ ગુણ લખ્યા હોય તેમનો ક્રમ (ગુણના ભિખારી)
+            <p className="text-[11px] text-stone-500 font-gujarati">
+              જેણે સૌથી વધુ ગુણ લખ્યા હોય તેમનો શ્રેષ્ઠ ક્રમ
             </p>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function WriterLeaderboard({
         >
           {isExpanded ? (
             <>
-              <span>ઓછા જુઓ (Top 5)</span>
+              <span>ઓછા જુઓ</span>
               <ChevronUp className="w-4 h-4" />
             </>
           ) : (
@@ -139,7 +139,7 @@ export default function WriterLeaderboard({
 
       {/* Motivation Footer for Logged In User */}
       <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs font-medium text-amber-900 flex items-center gap-2 font-gujarati">
-        <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+        <Award className="w-4 h-4 text-amber-600 shrink-0" />
         <span className="leading-snug">{motivationText}</span>
       </div>
     </div>

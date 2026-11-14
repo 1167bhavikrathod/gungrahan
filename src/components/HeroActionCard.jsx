@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PlusCircle, Target, Sparkles, CheckCircle2, Trees, Sprout, Flower2 } from 'lucide-react';
+import { PlusCircle, Target, CheckCircle2, Trees, Sprout, Flower2 } from 'lucide-react';
 
 export default function HeroActionCard({
   totalWrittenCount = 0,
@@ -72,7 +72,7 @@ export default function HeroActionCard({
           <PlusCircle className="w-5 h-5 text-amber-200" />
         </div>
         <span className="font-gujarati tracking-wide text-white text-base sm:text-lg">
-          + નવો ગુણ લખો (Add ગુણ)
+          + નવો ગુણ ઉમેરો
         </span>
       </button>
 

@@ -56,11 +56,11 @@ export default function LeaderboardPage() {
               <h1 className="text-lg font-bold text-stone-900 font-gujarati flex items-center gap-2">
                 ગુણ લેખક લીડરબોર્ડ
                 <span className="text-[10px] bg-gradient-to-r from-amber-200 to-yellow-200 text-amber-950 px-2.5 py-0.5 rounded-full font-bold shadow-2xs">
-                  Writer-First
+                  ગુણના ભિખારી
                 </span>
               </h1>
               <p className="text-xs text-amber-900/70 font-gujarati">
-                જેણે સૌથી વધુ ગુણ લખ્યા હોય તેમનો ક્રમ (ગુણના ભિખારી)
+                જેણે સૌથી વધુ ગુણ લખ્યા હોય તેમનો શ્રેષ્ઠ ક્રમ
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function LeaderboardPage() {
         <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-amber-50/20 border border-amber-900/10 shadow-[0_6px_24px_-4px_rgba(180,83,9,0.05)] space-y-3">
           <div className="text-center">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-800/80 font-gujarati">
-              👑 સુવર્ણ પોડિયમ (Top Writers)
+              👑 સુવર્ણ પોડિયમ
             </span>
           </div>
 

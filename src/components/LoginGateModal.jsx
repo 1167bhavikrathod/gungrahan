@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Sparkles, UserPlus, Search, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Search, CheckCircle2 } from 'lucide-react';
+import TilakChandlo from '@/components/TilakChandlo';
 import { getFirstGrapheme } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
@@ -86,9 +87,9 @@ export default function LoginGateModal({ karyakars, onSelectUser, wing, theme })
               : 'bg-gradient-to-br from-rose-600 via-pink-700 to-rose-800 text-white'
           }`}
         >
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-bold mb-3 border border-white/20">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span className="font-gujarati text-amber-100">✨ ગુણના ભિખારી બનીએ • રમતોત્સવ ૨૦૨૬</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-bold mb-3 border border-white/20">
+            <TilakChandlo className="w-4 h-4" />
+            <span className="font-gujarati text-amber-100">ગુણના ભિખારી બનીએ • રમતોત્સવ ૨૦૨૬</span>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight">ગુણગ્રહણ એપ</h1>
           <p className="text-xs sm:text-sm text-amber-100/90 mt-1 max-w-xs mx-auto font-gujarati">

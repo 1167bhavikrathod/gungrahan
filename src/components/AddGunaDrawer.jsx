@@ -5,7 +5,7 @@ import {
   X,
   Mic,
   MicOff,
-  Sparkles,
+  PenTool,
   UserCheck,
   Send,
   Plus,
@@ -99,7 +99,7 @@ export default function AddGunaDrawer({
       recognition.onerror = (event) => {
         console.warn('Speech recognition error:', event.error);
         if (event.error === 'not-allowed') {
-          alert('માઇક્રોફોનની પરવાનગી (Microphone Permission) બ્લોક છે. કૃપા કરીને બ્રાઉઝર એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને Permission આપો.');
+          alert('માઇક્રોફોનની પરવાનગી બંધ છે. કૃપા કરીને બ્રાઉઝર એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને મંજૂરી (Allow) આપો.');
           stopVoiceRecording();
         }
       };
@@ -340,11 +340,11 @@ export default function AddGunaDrawer({
         <div className={`p-4 sm:p-5 flex items-center justify-between border-b ${theme.headerBg}`}>
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white shadow-xs ${theme.isBal ? 'bg-gradient-to-br from-blue-700 to-indigo-800' : 'bg-gradient-to-br from-rose-600 to-pink-700'}`}>
-              <Sparkles className="w-5 h-5 text-amber-300" />
+              <PenTool className="w-4 h-4 text-amber-200" />
             </div>
             <div>
               <h2 className="font-extrabold text-base text-stone-900 font-gujarati">
-                નવો ગુણ લખો (+ Add ગુણ)
+                નવો ગુણ ઉમેરો
               </h2>
               <p className="text-[11px] text-amber-900/80 font-gujarati">
                 બીજા કાર્યકરની ઉત્તમ સેવા કે ગુણની કદર કરો
@@ -451,10 +451,10 @@ export default function AddGunaDrawer({
             </div>
           </div>
 
-          {/* 3. 1-Tap Gujarati Sentence Starters (Enhancement #2) */}
+          {/* 3. 1-Tap Gujarati Sentence Starters */}
           <div className="space-y-1.5">
-            <p className="text-[11px] font-bold text-stone-500 font-gujarati">
-              ⚡ ૧-ટેપ પ્રારંભિક વાક્યો (Anti-Writer&apos;s Block):
+            <p className="text-[11px] font-bold text-stone-600 font-gujarati">
+              વાક્યની શરૂઆત માટે પ્રેરક વાક્યો:
             </p>
             <div className="flex flex-wrap gap-1.5">
               {SENTENCE_STARTERS.map((starter, i) => (
@@ -484,11 +484,11 @@ export default function AddGunaDrawer({
             ))}
           </div>
 
-          {/* 4. Textarea with Voice-to-Text Mic (Enhancement #6) */}
+          {/* 4. Textarea with Voice-to-Text Mic */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor="guna-content" className="text-xs font-bold text-stone-700 font-gujarati">
-                ગુણ વર્ણન (ઓછામાં ઓછા ૩ અક્ષર) *
+                ગુણની વિગત *
               </label>
 
               {/* Gujarati Mic Button */}
@@ -505,12 +505,12 @@ export default function AddGunaDrawer({
                   {isRecording ? (
                     <>
                       <MicOff className="w-3.5 h-3.5" />
-                      <span>🔴 બોલો... (બંધ કરવા ટેપ કરો)</span>
+                      <span>🔴 સાંભળી રહ્યું છે...</span>
                     </>
                   ) : (
                     <>
                       <Mic className="w-3.5 h-3.5 text-amber-700" />
-                      <span>🎤 બોલીને લખો (Gujarati Mic)</span>
+                      <span>🎤 બોલીને લખો</span>
                     </>
                   )}
                 </button>
@@ -541,7 +541,7 @@ export default function AddGunaDrawer({
             >
               <Send className="w-5 h-5 text-amber-200" />
               <span className="font-gujarati text-white">
-                {isSubmitting ? 'ઉમેરાઈ રહ્યું છે...' : '✓ ગુણ ઉમેરો (Submit ગુણ)'}
+                {isSubmitting ? 'ઉમેરાઈ રહ્યું છે...' : 'ગુણ સમર્પિત કરો'}
               </span>
             </button>
           </div>

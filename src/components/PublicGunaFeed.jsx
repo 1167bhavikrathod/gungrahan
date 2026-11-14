@@ -63,12 +63,12 @@ export default function PublicGunaFeed({
       <div className={`p-4 rounded-3xl bg-white border ${theme.cardBorder} shadow-sm space-y-3`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MessageSquareQuote className="w-5 h-5 text-blue-600" />
-            <h3 className="font-bold text-base text-slate-900 font-gujarati">
-              ગુણ વાણી ફિડ (Live Feed)
+            <MessageSquareQuote className="w-5 h-5 text-amber-700" />
+            <h3 className="font-bold text-base text-stone-900 font-gujarati">
+              ગુણ વાણી
             </h3>
           </div>
-          <span className="text-xs font-semibold text-slate-500 font-gujarati">
+          <span className="text-xs font-semibold text-stone-500 font-gujarati">
             {filteredGunas.length} ગુણ
           </span>
         </div>

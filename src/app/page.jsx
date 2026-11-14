@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Sparkles,
   Trophy,
   ArrowRight,
   MessageSquareQuote,
@@ -129,8 +128,8 @@ export default function HomePage() {
             <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
               <Trophy className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-sm sm:text-base text-slate-900 font-gujarati">
-              લીડરબોર્ડ (ટોપ ૩ લેખકો)
+            <h2 className="font-bold text-sm sm:text-base text-stone-900 font-gujarati">
+              લીડરબોર્ડ • શ્રેષ્ઠ લેખકો
             </h2>
           </div>
 
@@ -186,17 +185,17 @@ export default function HomePage() {
       <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <MessageSquareQuote className="w-4 h-4 text-blue-600" />
-            <h2 className="font-bold text-sm sm:text-base text-slate-900 font-gujarati">
-              તાજેતરના ગુણો (Recent Virtues)
+            <MessageSquareQuote className="w-4 h-4 text-amber-700" />
+            <h2 className="font-bold text-sm sm:text-base text-stone-900 font-gujarati">
+              તાજેતરના ગુણ
             </h2>
           </div>
 
           <Link
             href="/feed"
-            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition font-gujarati"
+            className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 hover:text-blue-800 transition font-gujarati"
           >
-            <span>બધા ગુણ વાંચો ({gunas.length})</span>
+            <span>બધા ગુણ ({gunas.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

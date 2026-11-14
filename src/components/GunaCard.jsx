@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Share2, Heart, Sparkles, Clock, Edit3, PenLine } from 'lucide-react';
+import { Share2, Heart, Clock, Edit3, PenLine } from 'lucide-react';
 import { formatRelativeTime, buildWhatsAppShareUrl } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
@@ -69,7 +69,7 @@ export default function GunaCard({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-950 border border-amber-200/90 font-gujarati shrink-0 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
             <span className="truncate">{guna.recipient_name} નો ગુણ</span>
           </div>
 
@@ -114,7 +114,7 @@ export default function GunaCard({
             <button
               onClick={() => onEdit(guna)}
               className="w-8 h-8 rounded-xl flex items-center justify-center bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200/90 transition-all active:scale-95 shadow-2xs"
-              title="ગુણ સુધારો (Edit)"
+              title="ગુણ સુધારો"
             >
               <Edit3 className="w-3.5 h-3.5 text-amber-700" />
             </button>

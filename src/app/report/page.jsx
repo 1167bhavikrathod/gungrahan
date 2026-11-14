@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Printer, Download, Sparkles, Trophy, Edit3, Check } from 'lucide-react';
+import { ArrowLeft, Printer, Download, ScrollText, Trophy, Edit3, Check } from 'lucide-react';
 import { getWriterBadge, formatRelativeTime } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 
@@ -161,7 +161,7 @@ export default function ReportPage() {
                 : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
             }`}
           >
-            ક્રમાનુસાર (Chronological)
+            સમય અનુસાર
           </button>
           <button
             onClick={() => setViewMode('by-writer')}
@@ -171,7 +171,7 @@ export default function ReportPage() {
                 : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
             }`}
           >
-            લેખક પ્રમાણે (By Writer)
+            લેખક અનુસાર
           </button>
         </div>
       </div>
@@ -195,7 +195,7 @@ export default function ReportPage() {
         <div className="bg-amber-50/60 p-5 rounded-2xl border border-amber-200/80 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-900 font-gujarati flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              <ScrollText className="w-4 h-4 text-amber-700" />
               બાપાના ચરણોમાં પત્ર
             </span>
             <button

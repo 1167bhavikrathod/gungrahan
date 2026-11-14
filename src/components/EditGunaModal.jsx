@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Mic, MicOff, Sparkles, Save, Check } from 'lucide-react';
+import { X, Mic, MicOff, Edit3, Save, Check } from 'lucide-react';
 import { SENTENCE_STARTERS, VIRTUE_QUALITY_CHIPS } from '@/config/seedKaryakars';
 
 export default function EditGunaModal({
@@ -99,7 +99,7 @@ export default function EditGunaModal({
         console.warn('Speech error:', event.error);
         if (event.error === 'not-allowed') {
           alert(
-            'માઇક્રોફોનની પરવાનગી (Microphone Permission) બ્લોક છે. કૃપા કરીને બ્રાઉઝરના એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને Permission આપો.'
+            'માઇક્રોફોનની પરવાનગી બંધ છે. કૃપા કરીને બ્રાઉઝર એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને મંજૂરી (Allow) આપો.'
           );
           stopVoiceRecording();
         }
@@ -192,14 +192,14 @@ export default function EditGunaModal({
                 theme.isBal ? 'bg-gradient-to-br from-blue-700 to-indigo-800' : 'bg-gradient-to-br from-rose-600 to-pink-700'
               }`}
             >
-              <Sparkles className="w-5 h-5 text-amber-300" />
+              <Edit3 className="w-4 h-4 text-amber-200" />
             </div>
             <div>
               <h2 className="font-extrabold text-base text-stone-900 font-gujarati flex items-center gap-1.5">
-                ગુણ સુધારો (Edit ગુણ)
+                ગુણ સુધારો
               </h2>
               <p className="text-xs text-amber-900/80 font-gujarati font-medium">
-                🌟 {guna.recipient_name} નો ગુણ
+                {guna.recipient_name} નો ગુણ
               </p>
             </div>
           </div>
@@ -219,8 +219,8 @@ export default function EditGunaModal({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {/* Sentence Starters */}
           <div className="space-y-1.5">
-            <p className="text-[11px] font-bold text-stone-500 font-gujarati">
-              ⚡ ૧-ટેપ પ્રારંભિક વાક્યો ઉમેરો:
+            <p className="text-[11px] font-bold text-stone-600 font-gujarati">
+              વાક્યની શરૂઆત માટે પ્રેરક વાક્યો:
             </p>
             <div className="flex flex-wrap gap-1.5">
               {SENTENCE_STARTERS.slice(0, 3).map((starter, i) => (
@@ -257,6 +257,7 @@ export default function EditGunaModal({
                 ગુણ લખાણ *
               </label>
 
+              {/* Gujarati Mic Button */}
               {speechSupported && (
                 <button
                   type="button"
@@ -270,12 +271,12 @@ export default function EditGunaModal({
                   {isRecording ? (
                     <>
                       <MicOff className="w-3.5 h-3.5" />
-                      <span>🔴 બોલો... (બંધ કરવા ટેપ કરો)</span>
+                      <span>🔴 સાંભળી રહ્યું છે...</span>
                     </>
                   ) : (
                     <>
                       <Mic className="w-3.5 h-3.5 text-amber-700" />
-                      <span>🎤 બોલીને ઉમેરો (Mic)</span>
+                      <span>🎤 બોલીને લખો</span>
                     </>
                   )}
                 </button>
@@ -306,7 +307,7 @@ export default function EditGunaModal({
               }}
               className="flex-1 h-12 rounded-2xl text-stone-700 bg-stone-100 hover:bg-stone-200 font-bold text-sm transition font-gujarati"
             >
-              રદ કરો (Cancel)
+              રદ કરો
             </button>
             <button
               type="submit"
@@ -315,7 +316,7 @@ export default function EditGunaModal({
             >
               <Save className="w-4 h-4 text-amber-200" />
               <span className="font-gujarati text-white">
-                {isSubmitting ? 'સાચવી રહ્યું છે...' : 'સાચવો (Save Changes)'}
+                {isSubmitting ? 'સાચવી રહ્યું છે...' : 'સુધારો સાચવો'}
               </span>
             </button>
           </div>
