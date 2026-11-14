@@ -19,8 +19,8 @@ export const getTheme = (wing = 'bal') => {
       ? 'bg-blue-50/80 text-blue-900 border border-blue-200/80'
       : 'bg-rose-50/80 text-rose-900 border border-rose-200/80',
     avatarBadge: isBal
-      ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold'
-      : 'bg-rose-100 text-rose-900 border border-rose-300 font-bold',
+      ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-500 text-amber-950 font-black border border-amber-300 shadow-2xs'
+      : 'bg-gradient-to-br from-rose-400 via-rose-500 to-pink-500 text-white font-black border border-rose-300 shadow-2xs',
     // Warm Handcrafted Borders & Shadows
     cardBorder: 'border-amber-900/10',
     cardShadow: 'shadow-[0_10px_30px_-5px_rgba(180,83,9,0.06),0_4px_10px_-3px_rgba(180,83,9,0.03)]',

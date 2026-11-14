@@ -192,7 +192,7 @@ export default function EditGunaModal({
                 theme.isBal ? 'bg-gradient-to-br from-blue-700 to-indigo-800' : 'bg-gradient-to-br from-rose-600 to-pink-700'
               }`}
             >
-              <Sparkles className="w-4.5 h-4.5 text-amber-300" />
+              <Sparkles className="w-5 h-5 text-amber-300" />
             </div>
             <div>
               <h2 className="font-extrabold text-base text-stone-900 font-gujarati flex items-center gap-1.5">

@@ -340,7 +340,7 @@ export default function AddGunaDrawer({
         <div className={`p-4 sm:p-5 flex items-center justify-between border-b ${theme.headerBg}`}>
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white shadow-xs ${theme.isBal ? 'bg-gradient-to-br from-blue-700 to-indigo-800' : 'bg-gradient-to-br from-rose-600 to-pink-700'}`}>
-              <Sparkles className="w-4.5 h-4.5 text-amber-300" />
+              <Sparkles className="w-5 h-5 text-amber-300" />
             </div>
             <div>
               <h2 className="font-extrabold text-base text-stone-900 font-gujarati">
@@ -537,9 +537,9 @@ export default function AddGunaDrawer({
             <button
               type="submit"
               disabled={isSubmitting || !recipientId || content.trim().length < 3}
-              className={`w-full h-13 rounded-2xl flex items-center justify-center gap-2 font-bold text-base transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md ${theme.primaryGradient}`}
+              className={`w-full h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-base transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md ${theme.primaryGradient}`}
             >
-              <Send className="w-4.5 h-4.5 text-amber-200" />
+              <Send className="w-5 h-5 text-amber-200" />
               <span className="font-gujarati text-white">
                 {isSubmitting ? 'ઉમેરાઈ રહ્યું છે...' : '✓ ગુણ ઉમેરો (Submit ગુણ)'}
               </span>

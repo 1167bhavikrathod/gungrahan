@@ -122,7 +122,7 @@ export default function LoginGateModal({ karyakars, onSelectUser, wing, theme })
                   onClick={() => handleSelect(karyakar)}
                   className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl hover:bg-amber-50/80 active:scale-[0.99] text-left transition group border border-transparent hover:border-amber-200"
                 >
-                  <div className={`w-9.5 h-9.5 rounded-full flex items-center justify-center font-extrabold text-sm shadow-2xs ${theme.avatarBadge}`}>
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-sm shadow-2xs shrink-0 ${theme.avatarBadge}`}>
                     {initial}
                   </div>
                   <div className="flex-1 min-w-0">

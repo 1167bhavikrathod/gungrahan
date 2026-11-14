@@ -59,7 +59,7 @@ export default function StickyHeader() {
         {/* Left: Brand Block */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <div
-            className={`w-9.5 h-9.5 rounded-2xl flex items-center justify-center text-white shadow-sm border border-amber-300/40 ${
+            className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white shadow-sm border border-amber-300/40 ${
               theme.isBal
                 ? 'bg-gradient-to-br from-blue-700 to-indigo-800'
                 : 'bg-gradient-to-br from-rose-600 to-pink-700'
@@ -117,18 +117,28 @@ export default function StickyHeader() {
                 <span className="font-gujarati">{myWriterBadge.title}</span>
               </div>
 
-              {/* Avatar Button with Warm Gold Trim */}
+              {/* Avatar Pill Button: Elegant Handmade Medallion */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`flex items-center gap-1.5 p-0.5 rounded-full hover:ring-2 ${theme.ringFocus} transition focus:outline-none`}
+                className={`flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full bg-amber-50/90 hover:bg-amber-100/90 border border-amber-200/90 shadow-2xs hover:shadow-xs transition-all active:scale-95 focus:outline-none ${
+                  isMenuOpen ? 'ring-2 ring-amber-400/50 bg-amber-100' : ''
+                }`}
                 aria-label="User profile menu"
               >
                 <div
-                  className={`w-9.5 h-9.5 rounded-full flex items-center justify-center font-extrabold text-sm shadow-xs ${theme.avatarBadge}`}
+                  className={`w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 select-none ${theme.avatarBadge}`}
+                  style={{ width: '32px', height: '32px' }}
                 >
                   {userInitial}
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                <span className="text-xs font-bold text-stone-800 font-gujarati max-w-[70px] sm:max-w-[100px] truncate leading-none">
+                  {currentUser.name}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-amber-900/60 transition-transform duration-200 shrink-0 ${
+                    isMenuOpen ? 'rotate-180 text-amber-700' : ''
+                  }`}
+                />
               </button>
             </div>
 

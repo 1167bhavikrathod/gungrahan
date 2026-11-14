@@ -10,13 +10,15 @@ export function getFirstGrapheme(name) {
   const cleanName = name.trim();
   if (!cleanName) return '?';
 
+  let grapheme = '';
   try {
     if (typeof Intl !== 'undefined' && Intl.Segmenter) {
       const segmenter = new Intl.Segmenter('gu', { granularity: 'grapheme' });
       const segments = segmenter.segment(cleanName);
       for (const seg of segments) {
         if (seg.segment && seg.segment.trim().length > 0) {
-          return seg.segment.trim();
+          grapheme = seg.segment.trim();
+          break;
         }
       }
     }
@@ -24,8 +26,17 @@ export function getFirstGrapheme(name) {
     // Fallback if Intl.Segmenter is unavailable
   }
 
-  const chars = Array.from(cleanName);
-  return chars[0] || '?';
+  if (!grapheme) {
+    const chars = Array.from(cleanName);
+    grapheme = chars[0] || '?';
+  }
+
+  // If single ASCII/Latin letter (a-z), uppercase it cleanly so "tirth" becomes "T"
+  if (grapheme.length === 1 && /^[a-z]$/i.test(grapheme)) {
+    return grapheme.toUpperCase();
+  }
+
+  return grapheme;
 }
 
 /**
