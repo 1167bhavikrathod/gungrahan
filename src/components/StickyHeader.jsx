@@ -13,7 +13,6 @@ import {
   Trophy,
   Target,
 } from 'lucide-react';
-import TilakChandlo from '@/components/TilakChandlo';
 import { getFirstGrapheme } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 
@@ -55,25 +54,13 @@ export default function StickyHeader() {
     <header className={`sticky top-0 z-40 transition-colors ${theme.headerBg}`}>
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand Block */}
-        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <div
-            className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white shadow-sm border border-amber-300/40 bg-white/80`}
-          >
-            <TilakChandlo className="w-5 h-5 transition-transform group-hover:scale-110" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight text-stone-900">
-                ગુણગ્રહણ એપ
-              </span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs ${theme.primarySoftBg}`}>
-                {theme.wingLabelGujarati}
-              </span>
-            </div>
-            <p className="text-[11px] text-amber-900/80 font-gujarati -mt-0.5">
-              રમતોત્સવ ગુણ મહોત્સવ
-            </p>
-          </div>
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
+          <span className="font-extrabold text-lg sm:text-xl tracking-tight text-stone-900">
+            ગુણગ્રહણ એપ
+          </span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs ${theme.primarySoftBg}`}>
+            {theme.wingLabelGujarati}
+          </span>
         </Link>
 
         {/* Center: Desktop Navigation Tabs */}
