@@ -1,5 +1,9 @@
 import './globals.css';
 import { Noto_Sans_Gujarati, Plus_Jakarta_Sans } from 'next/font/google';
+import { AppProvider } from '@/context/AppContext';
+import StickyHeader from '@/components/StickyHeader';
+import BottomNavBar from '@/components/BottomNavBar';
+import GlobalModals from '@/components/GlobalModals';
 
 const notoSansGujarati = Noto_Sans_Gujarati({
   subsets: ['gujarati'],
@@ -34,8 +38,17 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="gu" className={`${notoSansGujarati.variable} ${plusJakartaSans.variable}`}>
-      <body className="min-h-screen antialiased selection:bg-blue-200 selection:text-blue-900">
-        {children}
+      <body className="min-h-screen antialiased selection:bg-blue-200 selection:text-blue-900 bg-[#F8FAFC]">
+        <AppProvider>
+          <div className="min-h-screen flex flex-col font-sans">
+            <StickyHeader />
+            <div className="flex-1 pb-20 md:pb-8">
+              {children}
+            </div>
+            <BottomNavBar />
+            <GlobalModals />
+          </div>
+        </AppProvider>
       </body>
     </html>
   );

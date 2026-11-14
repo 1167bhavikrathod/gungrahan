@@ -1,50 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Printer, Download, Sparkles, Trophy, Edit3, Check } from 'lucide-react';
-import { getTheme } from '@/config/theme';
-import { SEED_KARYAKARS_BAL, SEED_KARYAKARS_BALIKA } from '@/config/seedKaryakars';
 import { getWriterBadge, formatRelativeTime } from '@/lib/utils';
-import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
+import { useAppContext } from '@/context/AppContext';
 
 export default function ReportPage() {
-  const wing = process.env.NEXT_PUBLIC_APP_WING || 'bal';
-  const theme = useMemo(() => getTheme(wing), [wing]);
+  const { gunas, karyakars, theme, wing } = useAppContext();
 
-  const [gunas, setGunas] = useState([]);
-  const [karyakars, setKaryakars] = useState([]);
   const [viewMode, setViewMode] = useState('bapa-letter'); // 'bapa-letter' | 'chronological' | 'by-writer'
   const [isEditingLetter, setIsEditingLetter] = useState(false);
   const [customLetter, setCustomLetter] = useState('');
-
-  // Fetch data
-  useEffect(() => {
-    async function loadData() {
-      if (isSupabaseConfigured) {
-        const { data: kData } = await supabase
-          .from('karyakars')
-          .select('*')
-          .eq('wing', wing);
-
-        if (kData) setKaryakars(kData);
-
-        const { data: gData } = await supabase
-          .from('gunas')
-          .select('*')
-          .eq('wing', wing)
-          .order('created_at', { ascending: false });
-
-        if (gData) setGunas(gData);
-      } else {
-        const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
-        setKaryakars(seed);
-        const local = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
-        setGunas(local);
-      }
-    }
-    loadData();
-  }, [wing]);
 
   // Distinct writers count
   const distinctWritersCount = useMemo(() => {

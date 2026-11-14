@@ -1,0 +1,66 @@
+'use client';
+
+import React from 'react';
+import { useAppContext } from '@/context/AppContext';
+import AddGunaDrawer from '@/components/AddGunaDrawer';
+import EditGunaModal from '@/components/EditGunaModal';
+import LoginGateModal from '@/components/LoginGateModal';
+
+export default function GlobalModals() {
+  const {
+    isHydrated,
+    currentUser,
+    loginUser,
+    karyakars,
+    wing,
+    theme,
+    isAddModalOpen,
+    setIsAddModalOpen,
+    smartNudgeKaryakars,
+    myCoverageStats,
+    preselectedRecipientId,
+    onlyUnwrittenFilter,
+    handleGunaSubmitted,
+    editingGuna,
+    setEditingGuna,
+    handleSaveEditedGuna,
+  } = useAppContext();
+
+  return (
+    <>
+      {/* Login Gate Modal if user not yet chosen */}
+      {isHydrated && !currentUser && (
+        <LoginGateModal
+          karyakars={karyakars}
+          onSelectUser={loginUser}
+          wing={wing}
+          theme={theme}
+        />
+      )}
+
+      {/* Slide-Up Add Guna Drawer */}
+      <AddGunaDrawer
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        currentUser={currentUser}
+        karyakars={karyakars}
+        smartNudgeKaryakars={smartNudgeKaryakars}
+        myCoverageStats={myCoverageStats}
+        preselectedRecipientId={preselectedRecipientId}
+        onlyUnwrittenInitial={onlyUnwrittenFilter}
+        wing={wing}
+        theme={theme}
+        onGunaSubmitted={handleGunaSubmitted}
+      />
+
+      {/* Edit Guna Modal */}
+      <EditGunaModal
+        isOpen={Boolean(editingGuna)}
+        guna={editingGuna}
+        onClose={() => setEditingGuna(null)}
+        onSave={handleSaveEditedGuna}
+        theme={theme}
+      />
+    </>
+  );
+}

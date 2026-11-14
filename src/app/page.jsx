@@ -1,430 +1,226 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus } from 'lucide-react';
-import { getTheme } from '@/config/theme';
-import { SEED_KARYAKARS_BAL, SEED_KARYAKARS_BALIKA } from '@/config/seedKaryakars';
-import { getWriterBadge } from '@/lib/utils';
-import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
-
-import StickyHeader from '@/components/StickyHeader';
+import React from 'react';
+import Link from 'next/link';
+import {
+  Sparkles,
+  Trophy,
+  ArrowRight,
+  MessageSquareQuote,
+  Target,
+  CheckCircle2,
+  Award,
+} from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
 import HeroActionCard from '@/components/HeroActionCard';
-import WriterLeaderboard from '@/components/WriterLeaderboard';
-import PublicGunaFeed from '@/components/PublicGunaFeed';
-import AddGunaDrawer from '@/components/AddGunaDrawer';
-import EditGunaModal from '@/components/EditGunaModal';
-import LoginGateModal from '@/components/LoginGateModal';
+import GunaCard from '@/components/GunaCard';
 
 export default function HomePage() {
-  const wing = process.env.NEXT_PUBLIC_APP_WING || 'bal';
-  const targetGunas = parseInt(process.env.NEXT_PUBLIC_TARGET_GUNAS || '200', 10);
-  const theme = useMemo(() => getTheme(wing), [wing]);
+  const {
+    currentUser,
+    theme,
+    targetGunas,
+    totalWrittenCount,
+    myWrittenCount,
+    myWriterBadge,
+    writerLeaderboard,
+    myCoverageStats,
+    gunas,
+    openAddModal,
+    openCoverageAddModal,
+    handleRajipoIncrement,
+    setEditingGuna,
+  } = useAppContext();
 
-  // Master State
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [karyakars, setKaryakars] = useState([]);
-  const [gunas, setGunas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Modal / Drawer state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingGuna, setEditingGuna] = useState(null);
-  const [preselectedRecipientId, setPreselectedRecipientId] = useState(null);
-  const [onlyUnwrittenFilter, setOnlyUnwrittenFilter] = useState(false);
-  const [showFloatingFAB, setShowFloatingFAB] = useState(false);
-
-  // 1. Initial LocalStorage Hydration for Current User
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('gunagrahan_user_v1');
-      if (stored) {
-        setCurrentUser(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.warn('Failed to parse stored user:', e);
-    } finally {
-      setIsHydrated(true);
-    }
-  }, []);
-
-  // 2. Scroll listener for Floating Action Button (FAB)
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowFloatingFAB(window.scrollY > 280);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // 3. Load initial data from Supabase or fallback seeds
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadData() {
-      setIsLoading(true);
-      try {
-        if (isSupabaseConfigured) {
-          // Fetch karyakars for current wing
-          const { data: kData, error: kError } = await supabase
-            .from('karyakars')
-            .select('*')
-            .eq('wing', wing);
-
-          if (!kError && kData && kData.length > 0) {
-            if (isMounted) setKaryakars(kData);
-          } else {
-            // Seed fallback
-            const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
-            if (isMounted) setKaryakars(seed);
-          }
-
-          // Fetch gunas for current wing
-          const { data: gData, error: gError } = await supabase
-            .from('gunas')
-            .select('*')
-            .eq('wing', wing)
-            .order('created_at', { ascending: false });
-
-          if (!gError && gData) {
-            if (isMounted) setGunas(gData);
-          }
-        } else {
-          // Offline / Local Mock Mode
-          const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
-          const localGunas = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
-          if (isMounted) {
-            setKaryakars(seed);
-            setGunas(localGunas);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
-        if (isMounted) setKaryakars(seed);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-
-    loadData();
-
-    // 4. Supabase Realtime Subscription
-    if (isSupabaseConfigured) {
-      const channel = supabase
-        .channel(`gunagrahan-live-${wing}`)
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'gunas', filter: `wing=eq.${wing}` },
-          (payload) => {
-            setGunas((prev) => {
-              if (prev.some((g) => g.id === payload.new.id)) return prev;
-              return [payload.new, ...prev];
-            });
-          }
-        )
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'gunas', filter: `wing=eq.${wing}` },
-          (payload) => {
-            setGunas((prev) =>
-              prev.map((g) => (g.id === payload.new.id ? { ...g, ...payload.new } : g))
-            );
-          }
-        )
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'karyakars', filter: `wing=eq.${wing}` },
-          (payload) => {
-            setKaryakars((prev) => {
-              if (prev.some((k) => k.id === payload.new.id)) return prev;
-              return [...prev, payload.new];
-            });
-          }
-        )
-        .subscribe();
-
-      return () => {
-        isMounted = false;
-        supabase.removeChannel(channel);
-      };
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [wing]);
-
-  // Sort Karyakars alphabetically in Gujarati
-  const sortedKaryakars = useMemo(() => {
-    return [...karyakars].sort((a, b) => a.name.localeCompare(b.name, 'gu'));
-  }, [karyakars]);
-
-  // Handle Login User Selection
-  const handleSelectUser = useCallback((user) => {
-    setCurrentUser(user);
-    try {
-      localStorage.setItem('gunagrahan_user_v1', JSON.stringify(user));
-    } catch (e) {}
-
-    // Ensure new user exists in karyakars list
-    setKaryakars((prev) => {
-      if (prev.some((k) => k.id === user.id || k.name === user.name)) return prev;
-      return [...prev, user];
-    });
-  }, []);
-
-  // Handle Logout
-  const handleLogout = useCallback(() => {
-    setCurrentUser(null);
-    try {
-      localStorage.removeItem('gunagrahan_user_v1');
-    } catch (e) {}
-  }, []);
-
-  // Handle New Guna Submitted locally/optimistically
-  const handleGunaSubmitted = useCallback(
-    (newGuna) => {
-      setGunas((prev) => {
-        if (prev.some((g) => g.id === newGuna.id)) return prev;
-        const updated = [newGuna, ...prev];
-        if (!isSupabaseConfigured) {
-          try {
-            localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
-          } catch (e) {}
-        }
-        return updated;
-      });
-    },
-    [wing]
+  // Find user's rank on leaderboard
+  const userRankIndex = writerLeaderboard.findIndex(
+    (item) => item.authorId === currentUser?.id
   );
+  const userRank = userRankIndex >= 0 ? userRankIndex + 1 : '-';
 
-  // Handle Rajipo Count Increment
-  const handleRajipoIncrement = useCallback((gunaId) => {
-    setGunas((prev) =>
-      prev.map((g) => (g.id === gunaId ? { ...g, rajipo_count: (g.rajipo_count || 0) + 1 } : g))
-    );
-  }, []);
+  // Recent 3 gunas
+  const recentGunas = gunas.slice(0, 3);
 
-  // Handle Editing an Existing Guna
-  const handleSaveEditedGuna = useCallback(
-    async (updatedGuna) => {
-      // Optimistic state update
-      setGunas((prev) =>
-        prev.map((g) => (g.id === updatedGuna.id ? { ...g, content: updatedGuna.content } : g))
-      );
-
-      try {
-        if (isSupabaseConfigured) {
-          const { error } = await supabase
-            .from('gunas')
-            .update({ content: updatedGuna.content })
-            .eq('id', updatedGuna.id);
-
-          if (error) {
-            console.error('Failed to update guna in Supabase:', error);
-          }
-        } else {
-          const stored = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
-          const updated = stored.map((g) =>
-            g.id === updatedGuna.id ? { ...g, content: updatedGuna.content } : g
-          );
-          localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
-        }
-      } catch (err) {
-        console.error('Error saving updated guna:', err);
-      }
-    },
-    [wing]
-  );
-
-  // Computed Derived Analytics
-  const totalWrittenCount = gunas.length;
-
-  const myWrittenCount = useMemo(() => {
-    if (!currentUser) return 0;
-    return gunas.filter((g) => g.author_id === currentUser.id).length;
-  }, [gunas, currentUser]);
-
-  const myWriterBadge = useMemo(() => {
-    return getWriterBadge(myWrittenCount);
-  }, [myWrittenCount]);
-
-  // STRICT RULE: Group strictly by author_id (the writer)
-  const writerLeaderboard = useMemo(() => {
-    const counts = {};
-    const names = {};
-
-    gunas.forEach((g) => {
-      const aId = g.author_id;
-      counts[aId] = (counts[aId] || 0) + 1;
-      names[aId] = g.author_name || names[aId] || 'અજ્ઞાત લેખક';
-    });
-
-    const entries = Object.keys(counts).map((authorId) => ({
-      authorId,
-      authorName: names[authorId],
-      count: counts[authorId],
-      badge: getWriterBadge(counts[authorId]),
-    }));
-
-    return entries.sort((a, b) => b.count - a.count);
-  }, [gunas]);
-
-  // Personal Coverage Stats (20/20 Karyakar Checklist)
-  const myCoverageStats = useMemo(() => {
-    if (!currentUser) {
-      return { coveredCount: 0, totalOthers: 0, unwrittenKaryakars: [] };
-    }
-
-    const otherKaryakars = sortedKaryakars.filter((k) => k.id !== currentUser.id);
-    const writtenRecipientIds = new Set(
-      gunas.filter((g) => g.author_id === currentUser.id).map((g) => g.recipient_id)
-    );
-
-    const unwrittenKaryakars = otherKaryakars.filter((k) => !writtenRecipientIds.has(k.id));
-
-    return {
-      coveredCount: writtenRecipientIds.size,
-      totalOthers: otherKaryakars.length,
-      unwrittenKaryakars,
-    };
-  }, [sortedKaryakars, gunas, currentUser]);
-
-  // "કોનો ગુણ બાકી?" (Smart Unrecognized Karyakar Nudge)
-  const smartNudgeKaryakars = useMemo(() => {
-    if (!currentUser) return [];
-
-    const otherKaryakars = sortedKaryakars.filter((k) => k.id !== currentUser.id);
-    const writtenByMeSet = new Set(
-      gunas.filter((g) => g.author_id === currentUser.id).map((g) => g.recipient_id)
-    );
-
-    // Count how many times each karyakar has received gunas overall
-    const receivedCounts = {};
-    gunas.forEach((g) => {
-      receivedCounts[g.recipient_id] = (receivedCounts[g.recipient_id] || 0) + 1;
-    });
-
-    // Score karyakars: prioritize those whom currentUser hasn't written about yet,
-    // and who have the lowest total received count
-    const candidates = otherKaryakars.map((k) => ({
-      ...k,
-      writtenByMe: writtenByMeSet.has(k.id),
-      totalReceived: receivedCounts[k.id] || 0,
-    }));
-
-    candidates.sort((a, b) => {
-      // 1. Unwritten by me first
-      if (!a.writtenByMe && b.writtenByMe) return -1;
-      if (a.writtenByMe && !b.writtenByMe) return 1;
-      // 2. Lowest total received count
-      return a.totalReceived - b.totalReceived;
-    });
-
-    return candidates.slice(0, 3);
-  }, [sortedKaryakars, gunas, currentUser]);
-
-  // Open modal with preselected recipient or coverage filter
-  const handleOpenAddModal = (recipientId = null) => {
-    setPreselectedRecipientId(recipientId);
-    setOnlyUnwrittenFilter(false);
-    setIsAddModalOpen(true);
-  };
-
-  const handleOpenCoverageFilter = () => {
-    setPreselectedRecipientId(null);
-    setOnlyUnwrittenFilter(true);
-    setIsAddModalOpen(true);
-  };
+  // Top 3 writers
+  const topThree = writerLeaderboard.slice(0, 3);
 
   return (
-    <div className={`min-h-screen ${theme.appBg} flex flex-col font-sans selection:bg-blue-100`}>
-      {/* 1. Sticky Navigation Header */}
-      <StickyHeader
-        currentUser={currentUser}
-        myWriterBadge={myWriterBadge}
-        myWrittenCount={myWrittenCount}
+    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-5">
+      {/* 1. Welcome Card for Logged In User */}
+      {currentUser && (
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-200/60 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-slate-500 font-medium font-gujarati">
+              જય સ્વામિનારાયણ,
+            </p>
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 font-gujarati truncate">
+              {currentUser.name}
+            </h1>
+          </div>
+
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-xs ${myWriterBadge.colorClass}`}
+          >
+            <span>{myWriterBadge.icon}</span>
+            <span className="font-gujarati">{myWriterBadge.title}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Hero Action Card (+ Add ગુણ, સંપ વૃક્ષ, Coverage Ring) */}
+      <HeroActionCard
+        totalWrittenCount={totalWrittenCount}
+        targetCount={targetGunas}
         myCoverageStats={myCoverageStats}
         theme={theme}
-        onLogout={handleLogout}
+        onOpenAddModal={() => openAddModal(null)}
+        onOpenCoverageFilter={openCoverageAddModal}
       />
 
-      {/* Main Content Container */}
-      <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* 2. Hero Action Card (+ Add ગુણ, સંપ વૃક્ષ, Coverage Ring) */}
-        <HeroActionCard
-          totalWrittenCount={totalWrittenCount}
-          targetCount={targetGunas}
-          myCoverageStats={myCoverageStats}
-          theme={theme}
-          onOpenAddModal={() => handleOpenAddModal(null)}
-          onOpenCoverageFilter={handleOpenCoverageFilter}
-        />
-
-        {/* 3. Writer Leaderboard */}
-        <WriterLeaderboard
-          writerLeaderboard={writerLeaderboard}
-          currentUserId={currentUser?.id}
-          myWrittenCount={myWrittenCount}
-          theme={theme}
-        />
-
-        {/* 4. Public Guna Feed */}
-        <PublicGunaFeed
-          gunas={gunas}
-          karyakars={sortedKaryakars}
-          currentUserId={currentUser?.id}
-          theme={theme}
-          onRajipoIncrement={handleRajipoIncrement}
-          onEdit={(guna) => setEditingGuna(guna)}
-        />
-      </main>
-
-      {/* Floating Action Button (FAB) on Mobile Scroll */}
-      {showFloatingFAB && currentUser && (
-        <button
-          onClick={() => handleOpenAddModal(null)}
-          className={`fixed bottom-6 right-6 z-30 p-4 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform active:scale-90 hover:scale-105 ${theme.primaryGradient}`}
-          aria-label="Add new guna"
+      {/* 3. Quick Stats Snapshot 3-Column Grid */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {/* Total Gunas */}
+        <Link
+          href="/feed"
+          className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-blue-300 transition text-center group"
         >
-          <Plus className="w-6 h-6 text-white" />
-        </button>
-      )}
+          <div className="w-7 h-7 mx-auto rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-1 group-hover:scale-110 transition-transform">
+            <MessageSquareQuote className="w-4 h-4" />
+          </div>
+          <p className="text-xs text-slate-400 font-gujarati">કુલ ગુણ</p>
+          <p className="text-base font-bold text-slate-800 font-gujarati">
+            {totalWrittenCount}
+          </p>
+        </Link>
 
-      {/* Slide-Up Add Guna Drawer */}
-      <AddGunaDrawer
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        currentUser={currentUser}
-        karyakars={sortedKaryakars}
-        smartNudgeKaryakars={smartNudgeKaryakars}
-        myCoverageStats={myCoverageStats}
-        preselectedRecipientId={preselectedRecipientId}
-        onlyUnwrittenInitial={onlyUnwrittenFilter}
-        wing={wing}
-        theme={theme}
-        onGunaSubmitted={handleGunaSubmitted}
-      />
+        {/* User Rank */}
+        <Link
+          href="/leaderboard"
+          className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition text-center group"
+        >
+          <div className="w-7 h-7 mx-auto rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 mb-1 group-hover:scale-110 transition-transform">
+            <Trophy className="w-4 h-4" />
+          </div>
+          <p className="text-xs text-slate-400 font-gujarati">તમારો ક્રમ</p>
+          <p className="text-base font-bold text-amber-700 font-gujarati">
+            {userRank !== '-' ? `#${userRank}` : '-'}
+          </p>
+        </Link>
 
-      {/* Edit Guna Modal */}
-      <EditGunaModal
-        isOpen={Boolean(editingGuna)}
-        guna={editingGuna}
-        onClose={() => setEditingGuna(null)}
-        onSave={handleSaveEditedGuna}
-        theme={theme}
-      />
+        {/* Coverage */}
+        <Link
+          href="/coverage"
+          className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition text-center group"
+        >
+          <div className="w-7 h-7 mx-auto rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 mb-1 group-hover:scale-110 transition-transform">
+            <Target className="w-4 h-4" />
+          </div>
+          <p className="text-xs text-slate-400 font-gujarati">કવરેજ</p>
+          <p className="text-base font-bold text-emerald-700 font-gujarati">
+            {myCoverageStats.coveredCount}/{myCoverageStats.totalOthers}
+          </p>
+        </Link>
+      </div>
 
-      {/* Login Gate Modal (Rendered whenever no user is selected) */}
-      {isHydrated && !currentUser && (
-        <LoginGateModal
-          karyakars={sortedKaryakars}
-          onSelectUser={handleSelectUser}
-          wing={wing}
-          theme={theme}
-        />
-      )}
+      {/* 4. Top 3 Writers Podium Snapshot Card */}
+      <div className={`p-4 sm:p-5 rounded-3xl bg-white border ${theme.cardBorder} shadow-sm space-y-3`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <h2 className="font-bold text-sm sm:text-base text-slate-900 font-gujarati">
+              લીડરબોર્ડ (ટોપ ૩ લેખકો)
+            </h2>
+          </div>
+
+          <Link
+            href="/leaderboard"
+            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition font-gujarati"
+          >
+            <span>બધા રેન્ક જુઓ</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {topThree.length > 0 ? (
+          <div className="space-y-2">
+            {topThree.map((item, idx) => {
+              const medals = ['🥇', '🥈', '🥉'];
+              const isMe = item.authorId === currentUser?.id;
+              return (
+                <div
+                  key={item.authorId}
+                  className={`p-2.5 rounded-xl border flex items-center justify-between text-xs sm:text-sm font-semibold transition ${
+                    isMe
+                      ? 'bg-blue-50/80 border-blue-200'
+                      : 'bg-slate-50/70 border-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-base">{medals[idx]}</span>
+                    <span className="font-gujarati text-slate-800 truncate">
+                      {item.authorName}
+                    </span>
+                    {isMe && (
+                      <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold">
+                        તમે
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-bold text-slate-900 font-gujarati shrink-0 pl-2">
+                    {item.count} ગુણ
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 font-gujarati text-center py-2">
+            હજુ કોઈ ગુણ લખાયા નથી. પ્રથમ ગુણ લખો!
+          </p>
+        )}
+      </div>
+
+      {/* 5. Recent Guna Feed Preview Card */}
+      <div className="space-y-3 pt-1">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <MessageSquareQuote className="w-4 h-4 text-blue-600" />
+            <h2 className="font-bold text-sm sm:text-base text-slate-900 font-gujarati">
+              તાજેતરના ગુણો (Recent Virtues)
+            </h2>
+          </div>
+
+          <Link
+            href="/feed"
+            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition font-gujarati"
+          >
+            <span>બધા ગુણ વાંચો ({gunas.length})</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {recentGunas.length > 0 ? (
+          <div className="space-y-3">
+            {recentGunas.map((guna) => (
+              <GunaCard
+                key={guna.id}
+                guna={guna}
+                isMyWritten={guna.author_id === currentUser?.id}
+                isAboutMe={guna.recipient_id === currentUser?.id}
+                theme={theme}
+                onRajipoIncrement={handleRajipoIncrement}
+                onEdit={(g) => setEditingGuna(g)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="p-6 text-center bg-white rounded-3xl border border-slate-200 text-xs text-slate-400 font-gujarati">
+            હજુ સુધી કોઈ ગુણ ઉમેરાયા નથી.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

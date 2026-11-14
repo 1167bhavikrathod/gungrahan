@@ -2,17 +2,33 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, FileText, LogOut, ChevronDown, Award, Users } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import {
+  Sparkles,
+  FileText,
+  LogOut,
+  ChevronDown,
+  Award,
+  Users,
+  Home,
+  MessageSquareQuote,
+  Trophy,
+  Target,
+} from 'lucide-react';
 import { getFirstGrapheme } from '@/lib/utils';
+import { useAppContext } from '@/context/AppContext';
 
-export default function StickyHeader({
-  currentUser,
-  myWriterBadge,
-  myWrittenCount,
-  myCoverageStats,
-  theme,
-  onLogout,
-}) {
+export default function StickyHeader() {
+  const pathname = usePathname();
+  const {
+    currentUser,
+    myWriterBadge,
+    myWrittenCount,
+    myCoverageStats,
+    theme,
+    logoutUser,
+  } = useAppContext();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -29,12 +45,24 @@ export default function StickyHeader({
 
   const userInitial = getFirstGrapheme(currentUser?.name || '');
 
+  const navLinks = [
+    { label: 'હોમ', href: '/', icon: Home },
+    { label: 'ગુણ વાણી', href: '/feed', icon: MessageSquareQuote },
+    { label: 'લીડરબોર્ડ', href: '/leaderboard', icon: Trophy },
+    { label: 'કવરેજ', href: '/coverage', icon: Target },
+    { label: 'બાપાનો પત્ર', href: '/report', icon: FileText },
+  ];
+
   return (
     <header className={`sticky top-0 z-40 transition-colors ${theme.headerBg}`}>
-      <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Brand Block */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${theme.isBal ? 'bg-blue-600 text-white' : 'bg-rose-500 text-white'}`}>
+      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        {/* Left: Brand Block */}
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
+              theme.isBal ? 'bg-blue-600 text-white' : 'bg-rose-500 text-white'
+            }`}
+          >
             <Sparkles className="w-5 h-5 transition-transform group-hover:rotate-12" />
           </div>
           <div>
@@ -52,13 +80,35 @@ export default function StickyHeader({
           </div>
         </Link>
 
-        {/* Right User Cluster */}
+        {/* Center: Desktop Navigation Tabs */}
+        <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-2xl border border-slate-200/60">
+          {navLinks.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-gujarati font-semibold transition ${
+                  isActive
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? theme.primaryAccentText : 'text-slate-400'}`} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right: User Cluster */}
         {currentUser && (
-          <div className="relative" ref={menuRef}>
+          <div className="relative shrink-0" ref={menuRef}>
             <div className="flex items-center gap-2">
               {/* Writer Milestone Pill Badge */}
               <div
-                className={`hidden xs:flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border shadow-xs transition ${myWriterBadge.colorClass}`}
+                className={`hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border shadow-xs transition ${myWriterBadge.colorClass}`}
                 title={`તમારું લેખક પદવી: ${myWriterBadge.title}`}
               >
                 <span>{myWriterBadge.icon}</span>
@@ -83,7 +133,6 @@ export default function StickyHeader({
             {/* Profile Popover Menu */}
             {isMenuOpen && (
               <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200/80 py-2 z-50 animate-fadeIn">
-                {/* User Info Header */}
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-xs text-slate-400 font-medium">લોગિન કરેલ કાર્યકર</p>
                   <p className="text-sm font-bold text-slate-800 truncate font-gujarati mt-0.5">
@@ -99,7 +148,6 @@ export default function StickyHeader({
                   </div>
                 </div>
 
-                {/* Stats Summary */}
                 <div className="px-4 py-2.5 bg-slate-50/70 border-b border-slate-100 text-xs text-slate-600 space-y-1 font-gujarati">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 text-slate-500">
@@ -119,7 +167,6 @@ export default function StickyHeader({
                   </div>
                 </div>
 
-                {/* Action Links */}
                 <div className="py-1 text-sm font-gujarati">
                   <Link
                     href="/report"
@@ -133,7 +180,7 @@ export default function StickyHeader({
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
-                      onLogout();
+                      logoutUser();
                     }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-rose-600 hover:bg-rose-50 transition text-left"
                   >
