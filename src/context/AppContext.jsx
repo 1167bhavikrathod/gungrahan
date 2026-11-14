@@ -54,7 +54,26 @@ export function AppProvider({ children }) {
             .eq('wing', wing);
 
           if (!kError && kData && kData.length > 0) {
-            if (isMounted) setKaryakars(kData);
+            const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
+            const merged = [...kData];
+            seed.forEach((s) => {
+              const match = merged.find(
+                (m) =>
+                  m.name === s.name ||
+                  m.id === s.id ||
+                  (m.name && s.name && (m.name.includes(s.name.split(' ')[0]) || s.name.includes(m.name.split(' ')[0])))
+              );
+              if (match) {
+                if (!match.karyakar_number && s.karyakar_number) {
+                  match.karyakar_number = s.karyakar_number;
+                }
+                if (!match.role && s.role) match.role = s.role;
+                if (!match.sabha && s.sabha) match.sabha = s.sabha;
+              } else {
+                merged.push(s);
+              }
+            });
+            if (isMounted) setKaryakars(merged);
           } else {
             const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
             if (isMounted) setKaryakars(seed);

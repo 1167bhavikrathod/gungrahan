@@ -7,11 +7,15 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.karyakars (
   id uuid primary key default uuid_generate_v4(),
   name text not null,
+  karyakar_number text,
   wing text not null default 'bal' check (wing in ('bal', 'balika')),
   is_pre_registered boolean not null default true,
   created_at timestamptz not null default now(),
   unique(name, wing)
 );
+
+-- Ensure column exists if table was already created
+alter table public.karyakars add column if not exists karyakar_number text;
 
 -- 2. GUNAS TABLE (Virtue Entries)
 create table if not exists public.gunas (
