@@ -182,7 +182,7 @@ export default function EditGunaModal({
   if (!isOpen || !guna) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65 backdrop-blur-md animate-fadeIn">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className={`p-4 sm:p-5 flex items-center justify-between border-b ${theme.headerBg}`}>

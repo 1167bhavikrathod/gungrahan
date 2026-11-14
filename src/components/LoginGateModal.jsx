@@ -151,7 +151,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65 backdrop-blur-md animate-fadeIn">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Header Card */}
         <div
@@ -189,7 +189,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
               className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-stone-800 transition font-gujarati group"
             >
               <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-              <span>← બીજું નામ પસંદ કરો</span>
+              <span>બીજું નામ પસંદ કરો</span>
             </button>
 
             {/* Selected Karyakar Identity Card */}
@@ -284,7 +284,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
               className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-stone-800 transition font-gujarati"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>← લિસ્ટ પર પાછા જાઓ</span>
+              <span>લિસ્ટ પર પાછા જાઓ</span>
             </button>
 
             <div className="space-y-3">
