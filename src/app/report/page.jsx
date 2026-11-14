@@ -118,7 +118,7 @@ export default function ReportPage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-stone-700 hover:text-amber-800 transition font-gujarati"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>← ડેશબોર્ડ પર પાછા જાઓ</span>
+            <span>ડેશબોર્ડ પર પાછા જાઓ</span>
           </Link>
 
           <div className="flex items-center gap-2">
