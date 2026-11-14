@@ -38,10 +38,17 @@ body {
   border-image: linear-gradient(to right, #f59e0b, #fbbf24, #d97706) 1;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180, 83, 9, 0.18) transparent;
+}
+
 /* Custom warm amber scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -49,12 +56,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(217, 119, 6, 0.25);
+  background: rgba(180, 83, 9, 0.12);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(217, 119, 6, 0.45);
+  background: rgba(180, 83, 9, 0.25);
 }
 
 /* Print Styles for A4 Sacred Report */

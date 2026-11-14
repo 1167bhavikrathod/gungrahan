@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Share2, Heart, Sparkles, Clock, Edit3, MessageCircle } from 'lucide-react';
+import { Share2, Heart, Sparkles, Clock, Edit3, PenLine } from 'lucide-react';
 import { formatRelativeTime, buildWhatsAppShareUrl } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
@@ -55,17 +55,14 @@ export default function GunaCard({
 
   return (
     <div
-      className={`p-4.5 sm:p-5 rounded-3xl bg-white border border-amber-900/10 shadow-[0_6px_24px_-4px_rgba(180,83,9,0.05)] hover:shadow-[0_12px_32px_-4px_rgba(180,83,9,0.09)] transition-all duration-300 space-y-3.5 relative overflow-hidden group`}
+      className="p-4 sm:p-5 rounded-3xl bg-white border border-amber-900/10 shadow-[0_4px_20px_-4px_rgba(180,83,9,0.05)] hover:shadow-[0_8px_25px_-4px_rgba(180,83,9,0.08)] transition-all duration-200 space-y-3 relative overflow-hidden group"
     >
-      {/* Decorative Warm Corner Tint */}
-      <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-amber-200/20 via-orange-100/10 to-transparent rounded-bl-full pointer-events-none" />
-
       {/* 1. Top Row: Recipient Pill & Relative Time */}
-      <div className="flex items-center justify-between gap-2 relative z-10">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-100/90 to-amber-50 text-amber-950 border border-amber-300/80 font-gujarati shadow-2xs shrink-0">
-            <span className="text-amber-600">🌟</span>
-            <span>{guna.recipient_name} નો ગુણ</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-950 border border-amber-200/90 font-gujarati shrink-0 shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="truncate">{guna.recipient_name} નો ગુણ</span>
           </div>
 
           {isAboutMe && (
@@ -82,23 +79,24 @@ export default function GunaCard({
       </div>
 
       {/* 2. Middle Content: Calligraphic Virtue Scroll Body */}
-      <div className="pl-3.5 sm:pl-4 pr-1 py-1 border-l-4 border-amber-500/90 relative">
-        <p className="text-[15px] sm:text-[16px] text-stone-800 font-gujarati leading-[1.8] whitespace-pre-wrap selection:bg-amber-100 font-medium">
+      <div className="pl-3.5 sm:pl-4 pr-1 py-1 border-l-4 border-amber-500/90">
+        <p className="text-[15px] sm:text-[16px] text-stone-800 font-gujarati leading-[1.8] whitespace-pre-wrap font-medium">
           &ldquo;{guna.content}&rdquo;
         </p>
       </div>
 
-      {/* 3. Bottom Action Row */}
-      <div className="pt-2.5 border-t border-stone-100 flex items-center justify-between gap-2 relative z-10">
+      {/* 3. Bottom Action Row: Balanced and Non-Crowding */}
+      <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-2">
         {/* Writer Attribution */}
-        <div className="text-xs text-stone-500 font-gujarati truncate">
-          <span className="text-amber-800/80 font-medium">✍️ લખનાર: </span>
-          <span className="font-bold text-stone-800">
+        <div className="flex items-center gap-1 text-xs text-stone-500 font-gujarati min-w-0 pr-1">
+          <PenLine className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <span className="text-amber-900/80 font-medium shrink-0">લખનાર:</span>
+          <span className="font-bold text-stone-800 truncate">
             {guna.author_name}
-            {isMyWritten && (
-              <span className="text-blue-700 font-extrabold ml-1">(તમે)</span>
-            )}
           </span>
+          {isMyWritten && (
+            <span className="text-blue-700 font-bold shrink-0">(તમે)</span>
+          )}
         </div>
 
         {/* Right Action Cluster */}
@@ -107,29 +105,27 @@ export default function GunaCard({
           {isMyWritten && onEdit && (
             <button
               onClick={() => onEdit(guna)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200/90 transition-all active:scale-95 font-gujarati shadow-2xs"
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200/90 transition-all active:scale-95 shadow-2xs"
               title="ગુણ સુધારો (Edit)"
             >
               <Edit3 className="w-3.5 h-3.5 text-amber-700" />
-              <span className="hidden xs:inline">સુધારો</span>
             </button>
           )}
 
           {/* WhatsApp Share Button */}
           <button
             onClick={handleShare}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/90 transition-all active:scale-95 font-gujarati shadow-2xs"
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/90 transition-all active:scale-95 shadow-2xs"
             title="WhatsApp પર શેર કરો"
           >
             <Share2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden xs:inline">Share</span>
           </button>
 
           {/* Rajipo Appreciation Button */}
           <button
             onClick={handleRajipo}
             disabled={hasLiked}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 font-gujarati shadow-2xs ${
+            className={`h-8 px-2.5 rounded-xl flex items-center gap-1.5 text-xs font-bold border transition-all active:scale-95 shadow-2xs font-gujarati ${
               hasLiked
                 ? 'bg-rose-50 text-rose-700 border-rose-200 cursor-default'
                 : 'bg-stone-50 text-stone-700 hover:bg-rose-50 hover:text-rose-700 border-stone-200/90'
@@ -143,7 +139,7 @@ export default function GunaCard({
                   : 'text-stone-400 group-hover:text-rose-500'
               }`}
             />
-            <span>🙏 રાજીપો ({likeCount})</span>
+            <span>રાજીપો ({likeCount})</span>
           </button>
         </div>
       </div>

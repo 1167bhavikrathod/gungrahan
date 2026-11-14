@@ -38,11 +38,11 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="gu" className={`${notoSansGujarati.variable} ${plusJakartaSans.variable}`}>
-      <body className="min-h-screen antialiased selection:bg-blue-200 selection:text-blue-900 bg-[#F8FAFC]">
+      <body className="min-h-screen antialiased selection:bg-amber-200 selection:text-amber-950 bg-[#FAF7F2]">
         <AppProvider>
           <div className="min-h-screen flex flex-col font-sans">
             <StickyHeader />
-            <div className="flex-1 pb-20 md:pb-8">
+            <div className="flex-1 pb-32 md:pb-12">
               {children}
             </div>
             <BottomNavBar />

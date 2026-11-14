@@ -39,7 +39,7 @@ export function formatRelativeTime(dateString) {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return 'હમણાં જ (Just now)';
+    return 'હમણાં જ';
   }
 
   const mins = Math.floor(diffInSeconds / 60);
