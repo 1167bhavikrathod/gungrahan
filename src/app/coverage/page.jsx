@@ -46,7 +46,7 @@ export default function CoveragePage() {
   const ringStrokeOffset = ringCircumference - (coveragePercent / 100) * ringCircumference;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-4.5">
+    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* 1. Large Coverage Gauge Card */}
       <div className={`p-5 sm:p-6 rounded-3xl bg-white border border-amber-900/10 shadow-[0_6px_24px_-4px_rgba(180,83,9,0.05)] space-y-4 relative overflow-hidden`}>
         <div className="flex flex-col sm:flex-row items-center gap-5">

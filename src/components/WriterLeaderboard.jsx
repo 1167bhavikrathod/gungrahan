@@ -69,7 +69,7 @@ export default function WriterLeaderboard({
             return (
               <div
                 key={item.authorId}
-                className={`p-3 rounded-2xl transition border ${isMe ? 'bg-blue-50/70 border-blue-200 shadow-xs' : 'bg-slate-50/60 border-slate-100 hover:bg-slate-100/60'}`}
+                className={`p-3 rounded-2xl transition border ${isMe ? 'bg-blue-50/70 border-blue-200 shadow-xs' : 'bg-amber-50/30 border-amber-900/10 hover:bg-amber-100/40'}`}
               >
                 {/* Top Info Row */}
                 <div className="flex items-center justify-between text-xs sm:text-sm font-semibold mb-1.5">
@@ -77,11 +77,11 @@ export default function WriterLeaderboard({
                     <span className="text-sm shrink-0 w-6 text-center font-bold">
                       {getRankMedal(index)}
                     </span>
-                    <span className="truncate font-gujarati text-slate-800">
+                    <span className="truncate font-gujarati text-stone-800">
                       {item.authorName}
                     </span>
                     {isMe && (
-                      <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold shrink-0">
+                      <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-bold shrink-0">
                         તમે
                       </span>
                     )}
@@ -95,17 +95,17 @@ export default function WriterLeaderboard({
                   </div>
 
                   <div className="text-right shrink-0 pl-2">
-                    <span className="font-bold text-slate-900 font-gujarati text-sm">
+                    <span className="font-bold text-stone-900 font-gujarati text-sm">
                       {item.count}
                     </span>
-                    <span className="text-[11px] text-slate-500 font-gujarati ml-1">
+                    <span className="text-[11px] text-stone-500 font-gujarati ml-1">
                       ગુણ
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Track */}
-                <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-amber-100/60 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${isFirst ? 'bg-gradient-to-r from-amber-400 to-orange-500' : theme.progressBarFill}`}
                     style={{ width: `${barWidth}%` }}

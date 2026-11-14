@@ -44,7 +44,7 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-4.5">
+    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* 1. Header Banner */}
       <div className={`p-4 sm:p-5 rounded-3xl bg-white border border-amber-900/10 shadow-[0_6px_24px_-4px_rgba(180,83,9,0.05)] space-y-3 relative overflow-hidden`}>
         <div className="flex items-center justify-between">

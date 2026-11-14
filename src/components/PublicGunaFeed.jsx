@@ -74,13 +74,13 @@ export default function PublicGunaFeed({
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-amber-50/70 border border-amber-900/10 rounded-2xl overflow-x-auto">
           <button
             onClick={() => setActiveTab('all')}
             className={`flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition font-gujarati text-center ${
               activeTab === 'all'
                 ? theme.pillActive
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-amber-100/50'
             }`}
           >
             બધા ગુણો ({gunas.length})
@@ -91,7 +91,7 @@ export default function PublicGunaFeed({
             className={`flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition font-gujarati text-center ${
               activeTab === 'my-written'
                 ? theme.pillActive
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-amber-100/50'
             }`}
           >
             મેં લખેલા ({myWrittenCount})
@@ -102,7 +102,7 @@ export default function PublicGunaFeed({
             className={`flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition font-gujarati text-center ${
               activeTab === 'about-me'
                 ? theme.pillActive
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-amber-100/50'
             }`}
           >
             મારા વિશે ({forMeCount})
@@ -113,24 +113,24 @@ export default function PublicGunaFeed({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
           {/* Keyword Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
             <input
               type="text"
               value={contentSearch}
               onChange={(e) => setContentSearch(e.target.value)}
               placeholder="ગુણમાં શોધો..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs sm:text-sm font-gujarati focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-400"
+              className="w-full pl-9 pr-3 py-2 bg-stone-50/80 rounded-xl border border-stone-200 text-xs sm:text-sm font-gujarati focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 placeholder:text-stone-400"
             />
           </div>
 
           {/* Karyakar Filter Dropdown */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
             <select
               value={selectedKaryakarId}
               onChange={(e) => setSelectedKaryakarId(e.target.value)}
               aria-label="કાર્યકર પ્રમાણે ફિલ્ટર કરો"
-              className="w-full pl-9 pr-8 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs sm:text-sm font-gujarati text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-8 py-2 bg-stone-50/80 rounded-xl border border-stone-200 text-xs sm:text-sm font-gujarati text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 appearance-none cursor-pointer"
             >
               <option value="">🔍 બધા કાર્યકરો...</option>
               {karyakars.map((k) => (

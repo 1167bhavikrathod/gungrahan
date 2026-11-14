@@ -109,13 +109,13 @@ export default function ReportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 py-4 sm:py-8 px-2 sm:px-4 print:p-0 print:bg-white">
+    <div className="min-h-screen bg-[#FAF7F2] py-4 sm:py-8 px-2 sm:px-4 print:p-0 print:bg-white">
       {/* 1. Interactive Control Toolbar (Hidden in Print) */}
-      <div className="max-w-4xl mx-auto mb-6 p-4 rounded-2xl bg-white shadow-md border border-slate-200 print:hidden space-y-3">
+      <div className="max-w-4xl mx-auto mb-6 p-4 rounded-3xl bg-white shadow-sm border border-amber-900/10 print:hidden space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-600 transition font-gujarati"
+            className="inline-flex items-center gap-2 text-sm font-bold text-stone-700 hover:text-amber-800 transition font-gujarati"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>← ડેશબોર્ડ પર પાછા જાઓ</span>
@@ -124,7 +124,7 @@ export default function ReportPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition font-gujarati"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50/80 hover:bg-amber-100 text-amber-950 border border-amber-200/80 transition font-gujarati"
             >
               <Download className="w-4 h-4" />
               <span>CSV એક્સપોર્ટ</span>
@@ -132,7 +132,7 @@ export default function ReportPage() {
 
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition font-gujarati"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition font-gujarati"
             >
               <Printer className="w-4 h-4" />
               <span>🖨️ પ્રિન્ટ / PDF ડાઉનલોડ</span>
@@ -141,34 +141,34 @@ export default function ReportPage() {
         </div>
 
         {/* View Mode Selector */}
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
-          <span className="text-xs font-semibold text-slate-500 font-gujarati">ફોર્મેટ:</span>
+        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-100">
+          <span className="text-xs font-semibold text-stone-500 font-gujarati">ફોર્મેટ:</span>
           <button
             onClick={() => setViewMode('bapa-letter')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition font-gujarati ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati ${
               viewMode === 'bapa-letter'
-                ? 'bg-amber-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
             }`}
           >
             બાપાનો પત્ર + કાર્યકર પ્રમાણે
           </button>
           <button
             onClick={() => setViewMode('chronological')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition font-gujarati ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati ${
               viewMode === 'chronological'
-                ? 'bg-amber-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
             }`}
           >
             ક્રમાનુસાર (Chronological)
           </button>
           <button
             onClick={() => setViewMode('by-writer')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition font-gujarati ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati ${
               viewMode === 'by-writer'
-                ? 'bg-amber-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
             }`}
           >
             લેખક પ્રમાણે (By Writer)

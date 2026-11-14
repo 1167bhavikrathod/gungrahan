@@ -77,7 +77,7 @@ export default function HeroActionCard({
       </button>
 
       {/* 2. Living "સંપ વૃક્ષ" (Tree of Unity) Visual Progress Track */}
-      <div className="p-4 sm:p-4.5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 border border-amber-900/10 space-y-3">
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 border border-amber-900/10 space-y-3">
         <div className="flex items-center justify-between font-gujarati">
           <div className="flex items-center gap-2">
             <span className="text-lg">🌳</span>

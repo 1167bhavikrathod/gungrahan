@@ -48,18 +48,18 @@ export default function HomePage() {
     <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-5">
       {/* 1. Welcome Card for Logged In User */}
       {currentUser && (
-        <div className="p-4 rounded-3xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-200/60 flex items-center justify-between gap-3">
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-50/80 via-white to-orange-50/40 border border-amber-900/10 shadow-[0_4px_20px_-4px_rgba(180,83,9,0.05)] flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs text-slate-500 font-medium font-gujarati">
+            <p className="text-xs text-amber-900/70 font-semibold font-gujarati">
               જય સ્વામિનારાયણ,
             </p>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 font-gujarati truncate">
+            <h1 className="text-base sm:text-lg font-bold text-stone-900 font-gujarati truncate">
               {currentUser.name}
             </h1>
           </div>
 
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-xs ${myWriterBadge.colorClass}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-2xs ${myWriterBadge.colorClass}`}
           >
             <span>{myWriterBadge.icon}</span>
             <span className="font-gujarati">{myWriterBadge.title}</span>
@@ -82,13 +82,13 @@ export default function HomePage() {
         {/* Total Gunas */}
         <Link
           href="/feed"
-          className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-blue-300 transition text-center group"
+          className="p-3 bg-white rounded-2xl border border-amber-900/10 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.04)] hover:border-blue-300 transition text-center group"
         >
           <div className="w-7 h-7 mx-auto rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-1 group-hover:scale-110 transition-transform">
             <MessageSquareQuote className="w-4 h-4" />
           </div>
-          <p className="text-xs text-slate-400 font-gujarati">કુલ ગુણ</p>
-          <p className="text-base font-bold text-slate-800 font-gujarati">
+          <p className="text-xs text-stone-400 font-gujarati">કુલ ગુણ</p>
+          <p className="text-base font-bold text-stone-800 font-gujarati">
             {totalWrittenCount}
           </p>
         </Link>
@@ -96,12 +96,12 @@ export default function HomePage() {
         {/* User Rank */}
         <Link
           href="/leaderboard"
-          className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition text-center group"
+          className="p-3 bg-white rounded-2xl border border-amber-900/10 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.04)] hover:border-amber-300 transition text-center group"
         >
           <div className="w-7 h-7 mx-auto rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 mb-1 group-hover:scale-110 transition-transform">
             <Trophy className="w-4 h-4" />
           </div>
-          <p className="text-xs text-slate-400 font-gujarati">તમારો ક્રમ</p>
+          <p className="text-xs text-stone-400 font-gujarati">તમારો ક્રમ</p>
           <p className="text-base font-bold text-amber-700 font-gujarati">
             {userRank !== '-' ? `#${userRank}` : '-'}
           </p>
@@ -110,12 +110,12 @@ export default function HomePage() {
         {/* Coverage */}
         <Link
           href="/coverage"
-          className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition text-center group"
+          className="p-3 bg-white rounded-2xl border border-amber-900/10 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.04)] hover:border-emerald-300 transition text-center group"
         >
           <div className="w-7 h-7 mx-auto rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 mb-1 group-hover:scale-110 transition-transform">
             <Target className="w-4 h-4" />
           </div>
-          <p className="text-xs text-slate-400 font-gujarati">કવરેજ</p>
+          <p className="text-xs text-stone-400 font-gujarati">કવરેજ</p>
           <p className="text-base font-bold text-emerald-700 font-gujarati">
             {myCoverageStats.coveredCount}/{myCoverageStats.totalOthers}
           </p>
@@ -163,7 +163,7 @@ export default function HomePage() {
                       {item.authorName}
                     </span>
                     {isMe && (
-                      <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold">
+                      <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-bold">
                         તમે
                       </span>
                     )}
