@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PlusCircle, Target, Sparkles, CheckCircle2 } from 'lucide-react';
+import { PlusCircle, Target, Sparkles, CheckCircle2, Trees, Sprout, Flower2 } from 'lucide-react';
 
 export default function HeroActionCard({
   totalWrittenCount = 0,
@@ -21,99 +21,137 @@ export default function HeroActionCard({
   // Personal coverage percentage
   const coveragePercent = Math.min(100, Math.round((coveredCount / Math.max(1, totalOthers)) * 100));
 
-  // Checkpoints: 50, 100, 150, 200
-  const checkpoints = [
-    { target: 50, label: '૫૦' },
-    { target: 100, label: '૧૦૦' },
-    { target: 150, label: '૧૫૦' },
-    { target: 200, label: '૨૦૦' },
+  // 4 Living Stages of the Sacred Tree
+  const treeStages = [
+    { target: 50, icon: '🌱', label: 'અંકુર', targetNum: '૫૦' },
+    { target: 100, icon: '🌿', label: 'પલ્લવ', targetNum: '૧૦૦' },
+    { target: 150, icon: '🌸', label: 'પુષ્પ', targetNum: '૧૫૦' },
+    { target: 200, icon: '🌳', label: 'સંપ વૃક્ષ', targetNum: '૨૦૦' },
   ];
 
   // Active milestone celebratory banner message
   let celebrationBanner = null;
   if (totalWrittenCount >= 200) {
     celebrationBanner = {
-      text: '🏆 અદ્ભુત! ૨૦૦+ ગુણનો મહા-લક્ષ્યાંક પૂર્ણ! બાપા રાજીપો વરસાવશે!',
-      classes: 'bg-amber-100/90 text-amber-900 border-amber-300 animate-pulse',
+      text: '🏆 અદ્ભુત! ૨૦૦+ ગુણનો સુવર્ણ લક્ષ્યાંક પૂર્ણ! બાપા સર્વે પર રાજીપો વરસાવશે!',
+      classes: 'bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 text-amber-950 border-amber-300 shadow-sm animate-pulse',
     };
   } else if (totalWrittenCount >= 150) {
     celebrationBanner = {
-      text: '🌟 ૧૫૦ ગુણનો પડાવ પાર! લક્ષ્યાંકથી માત્ર થોડા જ દૂર!',
-      classes: 'bg-amber-50 text-amber-800 border-amber-200',
+      text: '🌸 ૧૫૦ ગુણનું પુષ્પ ખીલ્યું! પૂર્ણ લક્ષ્યાંકથી માત્ર થોડા જ ડગલાં દૂર!',
+      classes: 'bg-amber-50 text-amber-900 border-amber-200/90 shadow-xs',
     };
   } else if (totalWrittenCount >= 100) {
     celebrationBanner = {
-      text: '🎉 અભિનંદન! આપણે ૧૦૦ ગુણનો પડાવ પાર કર્યો!',
-      classes: 'bg-blue-50 text-blue-800 border-blue-200',
+      text: '🌿 ધન્યવાદ! આપણે ૧૦૦ ગુણનો ભવ્ય પડાવ સફળતાપૂર્વક પાર કર્યો!',
+      classes: 'bg-blue-50 text-blue-900 border-blue-200/90 shadow-xs',
     };
   } else if (totalWrittenCount >= 50) {
     celebrationBanner = {
-      text: '🌱 વાહ! ૫૦ ગુણનું સંપ વૃક્ષ ખીલી ઉઠ્યું છે!',
-      classes: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+      text: '🌱 વાહ! ૫૦ ગુણનું પવિત્ર સંપ વૃક્ષ અંકુરિત થઈ ગયું છે!',
+      classes: 'bg-emerald-50 text-emerald-900 border-emerald-200/90 shadow-xs',
     };
   }
 
   // SVG parameters for coverage ring
-  const ringRadius = 14;
+  const ringRadius = 15;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringStrokeOffset = ringCircumference - (coveragePercent / 100) * ringCircumference;
 
   return (
-    <div className={`p-4 sm:p-5 rounded-3xl bg-white border ${theme.cardBorder} shadow-sm space-y-4`}>
-      {/* 1. Primary CTA Button */}
+    <div className={`p-4 sm:p-6 rounded-3xl bg-white border ${theme.cardBorder} ${theme.cardShadow} space-y-5 relative overflow-hidden`}>
+      {/* Subtle auspicious background glow */}
+      <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-300/10 via-orange-300/5 to-transparent rounded-full blur-2xl pointer-events-none" />
+
+      {/* 1. Primary CTA Button - Royal Mandir Finish */}
       <button
         onClick={() => onOpenAddModal()}
-        className={`w-full h-14 rounded-2xl flex items-center justify-center gap-2.5 font-bold text-base transition transform active:scale-[0.98] ${theme.primaryGradient}`}
+        className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-md ${theme.primaryGradient}`}
       >
-        <PlusCircle className="w-5 h-5" />
-        <span className="font-gujarati tracking-wide">+ Add ગુણ (નવો ગુણ લખો)</span>
+        <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center">
+          <PlusCircle className="w-5 h-5 text-amber-200" />
+        </div>
+        <span className="font-gujarati tracking-wide text-white text-base sm:text-lg">
+          + નવો ગુણ લખો (Add ગુણ)
+        </span>
       </button>
 
-      {/* 2. Total Written ગુણ & 4-Checkpoint સંપ વૃક્ષ Bar */}
-      <div className="space-y-2 pt-1">
-        <div className="flex items-center justify-between text-xs sm:text-sm font-semibold font-gujarati">
-          <div className="flex items-center gap-1.5 text-slate-800">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>સંપ વૃક્ષ • સમૂહ લક્ષ્યાંક</span>
+      {/* 2. Living "સંપ વૃક્ષ" (Tree of Unity) Visual Progress Track */}
+      <div className="p-4 sm:p-4.5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 border border-amber-900/10 space-y-3">
+        <div className="flex items-center justify-between font-gujarati">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🌳</span>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base text-stone-900 flex items-center gap-1.5">
+                સંપ વૃક્ષ • સમૂહ લક્ષ્યાંક
+              </h3>
+              <p className="text-[11px] text-amber-800/80 -mt-0.5">
+                ૨૦૦ પવિત્ર ગુણોનું બાપાના ચરણોમાં અર્ઘ્ય
+              </p>
+            </div>
           </div>
-          <div className="text-slate-600">
-            <span className="text-base font-bold text-slate-900">{totalWrittenCount}</span>
-            <span className="text-xs text-slate-400"> / {targetCount} ગુણ</span>
+          <div className="text-right">
+            <span className="text-xl sm:text-2xl font-extrabold text-amber-900">
+              {totalWrittenCount}
+            </span>
+            <span className="text-xs text-stone-400 font-bold"> / {targetCount}</span>
           </div>
         </div>
 
-        {/* Segmented Progress Track */}
-        <div className="relative w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full transition-all duration-700 ease-out rounded-full ${theme.progressBarFill}`}
-            style={{ width: `${progressPercent}%` }}
-          />
+        {/* The Golden Progress Track with Checkpoint Nodes */}
+        <div className="relative pt-2 pb-1">
+          {/* Background Rail */}
+          <div className="relative w-full h-3 bg-stone-200/80 rounded-full overflow-hidden shadow-inner">
+            <div
+              className={`h-full transition-all duration-700 ease-out rounded-full ${theme.progressBarFill} shadow-sm`}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          {/* 4 Interactive Living Checkpoint Nodes */}
+          <div className="grid grid-cols-4 gap-1 pt-3 text-center">
+            {treeStages.map((stage) => {
+              const isReached = totalWrittenCount >= stage.target;
+              return (
+                <div
+                  key={stage.target}
+                  className={`flex flex-col items-center transition-all ${
+                    isReached ? 'scale-105' : 'opacity-60'
+                  }`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-xs transition-all ${
+                      isReached
+                        ? 'bg-amber-100 border-2 border-amber-500 shadow-amber-500/20'
+                        : 'bg-stone-100 border border-stone-200'
+                    }`}
+                  >
+                    <span>{stage.icon}</span>
+                  </div>
+                  <span
+                    className={`text-[11px] font-bold font-gujarati mt-1 ${
+                      isReached ? 'text-amber-900' : 'text-stone-400'
+                    }`}
+                  >
+                    {stage.label} ({stage.targetNum})
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 4 Checkpoint Markers */}
-        <div className="flex justify-between px-1 text-[11px] font-medium font-gujarati text-slate-500">
-          {checkpoints.map((cp) => {
-            const isReached = totalWrittenCount >= cp.target;
-            return (
-              <span
-                key={cp.target}
-                className={`flex items-center gap-0.5 transition ${isReached ? 'text-amber-600 font-bold' : 'text-slate-400'}`}
-              >
-                {isReached ? '✓ ' : '• '}{cp.label}
-              </span>
-            );
-          })}
-        </div>
-
-        {/* Active Celebration Banner */}
+        {/* Celebration Banner */}
         {celebrationBanner && (
-          <div className={`p-2.5 rounded-xl border text-xs text-center font-bold font-gujarati transition-all ${celebrationBanner.classes}`}>
+          <div
+            className={`p-2.5 rounded-xl border text-xs text-center font-bold font-gujarati transition-all ${celebrationBanner.classes}`}
+          >
             {celebrationBanner.text}
           </div>
         )}
       </div>
 
-      {/* 3. Personal Coverage Ring Interactive Pill (Enhancement #4) */}
+      {/* 3. Personal "Coverage Ring" Card - Handcrafted Seal Style */}
       <div
         onClick={() => onOpenCoverageFilter()}
         role="button"
@@ -124,28 +162,26 @@ export default function HeroActionCard({
             onOpenCoverageFilter();
           }
         }}
-        className="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between cursor-pointer hover:bg-slate-100/90 active:scale-[0.99] transition-all group"
+        className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50/40 via-white to-orange-50/20 border border-amber-900/10 flex items-center justify-between cursor-pointer hover:border-amber-300 hover:shadow-xs active:scale-[0.99] transition-all group"
       >
-        {/* Left Side: SVG Ring + Text */}
+        {/* Left: SVG Gauge + Spiritual Copy */}
         <div className="flex items-center gap-3">
-          <div className="relative w-9 h-9 flex items-center justify-center shrink-0">
-            <svg className="w-9 h-9 transform -rotate-90" viewBox="0 0 36 36">
-              {/* Background Track */}
+          <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+            <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
               <circle
                 cx="18"
                 cy="18"
                 r={ringRadius}
                 fill="none"
-                stroke="#E2E8F0"
+                stroke="#E7E5E4"
                 strokeWidth="3.5"
               />
-              {/* Progress Stroke */}
               <circle
                 cx="18"
                 cy="18"
                 r={ringRadius}
                 fill="none"
-                stroke={coveragePercent >= 100 ? '#10B981' : (theme.isBal ? '#2563EB' : '#F43F5E')}
+                stroke={coveragePercent >= 100 ? '#10B981' : theme.isBal ? '#1D4ED8' : '#F43F5E'}
                 strokeWidth="3.5"
                 strokeDasharray={ringCircumference}
                 strokeDashoffset={ringStrokeOffset}
@@ -153,29 +189,29 @@ export default function HeroActionCard({
                 className="transition-all duration-700 ease-out"
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-slate-700">
+            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-extrabold text-stone-700">
               {coveragePercent}%
             </div>
           </div>
 
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-800 font-gujarati">
-              🎯 તમે {totalOthers} માંથી {coveredCount} કાર્યકરોના ગુણ લખ્યા છે
+            <p className="text-xs sm:text-sm font-bold text-stone-900 font-gujarati">
+              🎯 તમે {totalOthers} માંથી {coveredCount} કાર્યકરોના ગુણ લખ્યા
             </p>
-            <p className="text-[11px] text-slate-400 font-gujarati">
-              દરેક કાર્યકરનો ઓછામાં ઓછો એક ગુણ લખવાનો સંકલ્પ
+            <p className="text-[11px] text-stone-500 font-gujarati">
+              કોઈ કાર્યકર બાકી ન રહે તેવો પવિત્ર સંકલ્પ
             </p>
           </div>
         </div>
 
-        {/* Right Action Badge */}
+        {/* Right: Action Pill */}
         <div className="shrink-0 pl-2">
           {unwrittenCount > 0 ? (
-            <span className="inline-flex items-center text-xs font-bold text-blue-600 group-hover:text-blue-700 group-hover:translate-x-0.5 transition font-gujarati">
-              બાકીના {unwrittenCount} જુઓ →
+            <span className="inline-flex items-center text-xs font-bold text-amber-800 bg-amber-100/80 hover:bg-amber-200/80 px-2.5 py-1 rounded-full transition font-gujarati group-hover:translate-x-0.5">
+              બાકી {unwrittenCount} →
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 font-gujarati">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded-full font-gujarati">
               <CheckCircle2 className="w-3.5 h-3.5" /> બધા કવર!
             </span>
           )}

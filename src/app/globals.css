@@ -3,25 +3,42 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-rgb: 248, 250, 252;
+  --foreground-rgb: 28, 25, 23;
+  --background-rgb: 250, 247, 242;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  background-color: rgb(var(--background-rgb));
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(217, 119, 6, 0.04) 0%, transparent 50%);
+  background-attachment: fixed;
   font-family: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Gujarati Font Class */
+/* Gujarati Font Class with generous spiritual line-height */
 .font-gujarati {
   font-family: var(--font-noto-gujarati), 'Noto Sans Gujarati', sans-serif;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
-/* Custom subtle scrollbar */
+/* Handcrafted Devotional Card */
+.devotional-card {
+  background: #ffffff;
+  border: 1px solid rgba(180, 83, 9, 0.12);
+  box-shadow: 0 10px 30px -5px rgba(180, 83, 9, 0.05), 0 4px 10px -3px rgba(180, 83, 9, 0.02);
+  border-radius: 1.5rem;
+}
+
+/* Gold Foil Accent */
+.gold-foil-border {
+  border-image: linear-gradient(to right, #f59e0b, #fbbf24, #d97706) 1;
+}
+
+/* Custom warm amber scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -32,12 +49,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(217, 119, 6, 0.25);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: rgba(217, 119, 6, 0.45);
 }
 
 /* Print Styles for A4 Sacred Report */
@@ -70,7 +87,6 @@ body {
     border-bottom: 2px solid #b45309 !important;
   }
 
-  /* Force background colors to print */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;

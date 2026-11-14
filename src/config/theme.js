@@ -1,27 +1,40 @@
-// Dual-Wing Design Tokens (Bal vs Balika)
+// Dual-Wing Design Tokens (Bal vs Balika) - Handcrafted Spiritual Edition
 export const getTheme = (wing = 'bal') => {
   const isBal = wing === 'bal';
   return {
     isBal,
     wing,
     wingLabelGujarati: isBal ? 'બાળ મંડળ' : 'બાલિકા મંડળ',
-    appBg: isBal ? 'bg-[#F8FAFC] text-[#0F172A]' : 'bg-[#FFFBFB] text-[#1E1B18]',
+    // Warm Parchment & Ivory Backgrounds
+    appBg: isBal ? 'bg-[#FAF7F2] text-[#1C1917]' : 'bg-[#FFF9F9] text-[#1C1917]',
     headerBg: isBal
-      ? 'bg-white/85 backdrop-blur-md border-b border-slate-200/80'
-      : 'bg-white/85 backdrop-blur-md border-b border-rose-100',
+      ? 'bg-[#FFFDF9]/92 backdrop-blur-md border-b border-amber-900/10 shadow-xs'
+      : 'bg-[#FFFDF9]/92 backdrop-blur-md border-b border-rose-200/60 shadow-xs',
+    // Royal Mandir Gradient Buttons
     primaryGradient: isBal
-      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25'
-      : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white shadow-lg shadow-rose-500/25',
-    primaryAccentText: isBal ? 'text-blue-600' : 'text-rose-600',
-    primarySoftBg: isBal ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-rose-50 text-rose-700 border-rose-200',
-    avatarBadge: isBal ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-rose-100 text-rose-700 border border-rose-200',
-    cardBorder: isBal ? 'border-slate-200/80' : 'border-rose-100',
-    quoteBorder: isBal ? 'border-l-4 border-blue-500' : 'border-l-4 border-rose-500',
-    progressBarFill: isBal ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gradient-to-r from-rose-500 to-pink-600',
-    ringFocus: isBal ? 'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600' : 'focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600',
-    accentRing: isBal ? 'ring-blue-500' : 'ring-rose-500',
-    accentHover: isBal ? 'hover:bg-blue-50' : 'hover:bg-rose-50',
-    pillActive: isBal ? 'bg-blue-600 text-white shadow-sm' : 'bg-rose-600 text-white shadow-sm',
-    pillInactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+      ? 'bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-800 hover:to-indigo-800 text-white shadow-lg shadow-blue-900/20 active:scale-[0.98] border border-blue-400/20'
+      : 'bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:from-rose-700 hover:to-pink-700 text-white shadow-lg shadow-rose-900/20 active:scale-[0.98] border border-rose-300/30',
+    primaryAccentText: isBal ? 'text-blue-700' : 'text-rose-600',
+    primarySoftBg: isBal
+      ? 'bg-blue-50/80 text-blue-900 border border-blue-200/80'
+      : 'bg-rose-50/80 text-rose-900 border border-rose-200/80',
+    avatarBadge: isBal
+      ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold'
+      : 'bg-rose-100 text-rose-900 border border-rose-300 font-bold',
+    // Warm Handcrafted Borders & Shadows
+    cardBorder: 'border-amber-900/10',
+    cardShadow: 'shadow-[0_10px_30px_-5px_rgba(180,83,9,0.06),0_4px_10px_-3px_rgba(180,83,9,0.03)]',
+    quoteBorder: isBal ? 'border-l-4 border-amber-500' : 'border-l-4 border-rose-500',
+    progressBarFill: isBal
+      ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600'
+      : 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600',
+    goldGradient: 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-amber-950 shadow-md shadow-amber-500/25',
+    ringFocus: isBal
+      ? 'focus:ring-2 focus:ring-amber-500/30 focus:border-amber-600'
+      : 'focus:ring-2 focus:ring-rose-500/30 focus:border-rose-600',
+    pillActive: isBal
+      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 text-white shadow-xs font-bold'
+      : 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs font-bold',
+    pillInactive: 'bg-amber-50/70 text-stone-600 hover:bg-amber-100/70 hover:text-stone-900 border border-amber-200/40',
   };
 };
