@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Share2, Heart, Sparkles, Clock, Check } from 'lucide-react';
+import { Share2, Heart, Sparkles, Clock, Check, Edit3 } from 'lucide-react';
 import { formatRelativeTime, buildWhatsAppShareUrl } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
@@ -11,6 +11,7 @@ export default function GunaCard({
   isAboutMe = false,
   theme,
   onRajipoIncrement,
+  onEdit,
 }) {
   const [hasLiked, setHasLiked] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -101,6 +102,18 @@ export default function GunaCard({
 
         {/* Right Action Cluster */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Edit Button for Author */}
+          {isMyWritten && onEdit && (
+            <button
+              onClick={() => onEdit(guna)}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition active:scale-95 font-gujarati"
+              title="ગુણ સુધારો (Edit)"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline">સુધારો</span>
+            </button>
+          )}
+
           {/* WhatsApp Share Button (Enhancement #5) */}
           <button
             onClick={handleShare}

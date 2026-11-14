@@ -12,6 +12,7 @@ import HeroActionCard from '@/components/HeroActionCard';
 import WriterLeaderboard from '@/components/WriterLeaderboard';
 import PublicGunaFeed from '@/components/PublicGunaFeed';
 import AddGunaDrawer from '@/components/AddGunaDrawer';
+import EditGunaModal from '@/components/EditGunaModal';
 import LoginGateModal from '@/components/LoginGateModal';
 
 export default function HomePage() {
@@ -28,6 +29,7 @@ export default function HomePage() {
 
   // Modal / Drawer state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingGuna, setEditingGuna] = useState(null);
   const [preselectedRecipientId, setPreselectedRecipientId] = useState(null);
   const [onlyUnwrittenFilter, setOnlyUnwrittenFilter] = useState(false);
   const [showFloatingFAB, setShowFloatingFAB] = useState(false);
@@ -204,6 +206,38 @@ export default function HomePage() {
     );
   }, []);
 
+  // Handle Editing an Existing Guna
+  const handleSaveEditedGuna = useCallback(
+    async (updatedGuna) => {
+      // Optimistic state update
+      setGunas((prev) =>
+        prev.map((g) => (g.id === updatedGuna.id ? { ...g, content: updatedGuna.content } : g))
+      );
+
+      try {
+        if (isSupabaseConfigured) {
+          const { error } = await supabase
+            .from('gunas')
+            .update({ content: updatedGuna.content })
+            .eq('id', updatedGuna.id);
+
+          if (error) {
+            console.error('Failed to update guna in Supabase:', error);
+          }
+        } else {
+          const stored = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
+          const updated = stored.map((g) =>
+            g.id === updatedGuna.id ? { ...g, content: updatedGuna.content } : g
+          );
+          localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
+        }
+      } catch (err) {
+        console.error('Error saving updated guna:', err);
+      }
+    },
+    [wing]
+  );
+
   // Computed Derived Analytics
   const totalWrittenCount = gunas.length;
 
@@ -343,6 +377,7 @@ export default function HomePage() {
           currentUserId={currentUser?.id}
           theme={theme}
           onRajipoIncrement={handleRajipoIncrement}
+          onEdit={(guna) => setEditingGuna(guna)}
         />
       </main>
 
@@ -370,6 +405,15 @@ export default function HomePage() {
         wing={wing}
         theme={theme}
         onGunaSubmitted={handleGunaSubmitted}
+      />
+
+      {/* Edit Guna Modal */}
+      <EditGunaModal
+        isOpen={Boolean(editingGuna)}
+        guna={editingGuna}
+        onClose={() => setEditingGuna(null)}
+        onSave={handleSaveEditedGuna}
+        theme={theme}
       />
 
       {/* Login Gate Modal (Rendered whenever no user is selected) */}

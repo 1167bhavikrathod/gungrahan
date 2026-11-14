@@ -10,6 +10,7 @@ export default function PublicGunaFeed({
   currentUserId,
   theme,
   onRajipoIncrement,
+  onEdit,
 }) {
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'my-written' | 'about-me'
   const [selectedKaryakarId, setSelectedKaryakarId] = useState('');
@@ -153,6 +154,7 @@ export default function PublicGunaFeed({
               isAboutMe={guna.recipient_id === currentUserId}
               theme={theme}
               onRajipoIncrement={onRajipoIncrement}
+              onEdit={onEdit}
             />
           ))
         ) : (

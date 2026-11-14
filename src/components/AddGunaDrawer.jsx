@@ -43,6 +43,87 @@ export default function AddGunaDrawer({
 
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+  const isRecordingRef = useRef(false);
+  const baseContentRef = useRef('');
+
+  // Stop recording helper
+  const stopVoiceRecording = () => {
+    isRecordingRef.current = false;
+    setIsRecording(false);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+    }
+  };
+
+  // Start continuous voice recording
+  const startVoiceRecording = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('તમારા બ્રાઉઝરમાં માઇક્રોફોન સ્પીચ સપોર્ટ નથી. કૃપા કરીને Google Chrome અથવા Edge વાપરો.');
+      return;
+    }
+
+    baseContentRef.current = content;
+    isRecordingRef.current = true;
+    setIsRecording(true);
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'gu-IN';
+
+      recognition.onresult = (event) => {
+        let finalSpeech = '';
+        let interimSpeech = '';
+
+        for (let i = 0; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalSpeech += event.results[i][0].transcript + ' ';
+          } else {
+            interimSpeech += event.results[i][0].transcript;
+          }
+        }
+
+        const combined = (finalSpeech + interimSpeech).trim();
+        if (combined) {
+          const base = baseContentRef.current;
+          const separator = base && !base.endsWith(' ') ? ' ' : '';
+          setContent(base + separator + combined);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+          alert('માઇક્રોફોનની પરવાનગી (Microphone Permission) બ્લોક છે. કૃપા કરીને બ્રાઉઝર એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને Permission આપો.');
+          stopVoiceRecording();
+        }
+      };
+
+      recognition.onend = () => {
+        // If user hasn't pressed stop button, auto-restart to prevent premature termination
+        if (isRecordingRef.current) {
+          try {
+            recognition.start();
+          } catch (e) {
+            stopVoiceRecording();
+          }
+        } else {
+          setIsRecording(false);
+        }
+      };
+
+      recognition.start();
+      recognitionRef.current = recognition;
+    } catch (err) {
+      console.error('Failed to start speech recognition:', err);
+      stopVoiceRecording();
+    }
+  };
 
   // Synchronize preselected recipient or initial filters when drawer opens
   useEffect(() => {
@@ -54,68 +135,30 @@ export default function AddGunaDrawer({
     } else {
       setContent('');
       setRecipientSearch('');
-      setIsRecording(false);
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {}
-      }
+      stopVoiceRecording();
     }
   }, [isOpen, preselectedRecipientId, onlyUnwrittenInitial]);
 
-  // Setup Web Speech Recognition API
+  // Check speech recognition support
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         setSpeechSupported(true);
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'gu-IN';
-
-        recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          setContent((prev) => {
-            const separator = prev && !prev.endsWith(' ') ? ' ' : '';
-            return prev + separator + transcript;
-          });
-          setIsRecording(false);
-        };
-
-        recognition.onerror = (event) => {
-          console.warn('Speech recognition error:', event.error);
-          setIsRecording(false);
-        };
-
-        recognition.onend = () => {
-          setIsRecording(false);
-        };
-
-        recognitionRef.current = recognition;
       }
     }
+    return () => {
+      stopVoiceRecording();
+    };
   }, []);
 
   // Toggle Voice Recording
   const handleToggleVoice = () => {
-    if (!speechSupported || !recognitionRef.current) {
-      alert('તમારા બ્રાઉઝરમાં માઇક સપોર્ટ ઉપલબ્ધ નથી.');
-      return;
-    }
-
     if (isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
+      stopVoiceRecording();
     } else {
-      try {
-        recognitionRef.current.start();
-        setIsRecording(true);
-      } catch (err) {
-        console.error('Failed to start speech recognition:', err);
-        setIsRecording(false);
-      }
+      startVoiceRecording();
     }
   };
 
@@ -462,7 +505,7 @@ export default function AddGunaDrawer({
                   {isRecording ? (
                     <>
                       <MicOff className="w-3.5 h-3.5" />
-                      <span>🔴 સાંભળી રહ્યું છે... બોલો</span>
+                      <span>🔴 બોલો... (બંધ કરવા ટેપ કરો)</span>
                     </>
                   ) : (
                     <>
@@ -479,7 +522,10 @@ export default function AddGunaDrawer({
               ref={textareaRef}
               rows={4}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                baseContentRef.current = e.target.value;
+              }}
               placeholder="તેમણે સેવામાં શું ઉત્તમ કર્યું? શાંતિથી, પ્રેમથી કે ખંતપૂર્વક કરેલી સેવા લખો..."
               className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-gujarati text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-400"
               required
