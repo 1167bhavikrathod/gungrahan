@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  FileText,
   LogOut,
   ChevronDown,
   Award,
@@ -50,7 +49,6 @@ export default function StickyHeader() {
     { label: 'ગુણ વાણી', href: '/feed', icon: MessageSquareQuote },
     { label: 'લીડરબોર્ડ', href: '/leaderboard', icon: Trophy },
     { label: 'કવરેજ', href: '/coverage', icon: Target },
-    { label: 'બાપાનો પત્ર', href: '/report', icon: FileText },
   ];
 
   return (
@@ -176,15 +174,6 @@ export default function StickyHeader() {
                 </div>
 
                 <div className="py-1 text-sm font-gujarati">
-                  <Link
-                    href="/report"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition"
-                  >
-                    <FileText className="w-4 h-4 text-amber-600" />
-                    <span>બાપાનો પત્ર અને રિપોર્ટ</span>
-                  </Link>
-
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
