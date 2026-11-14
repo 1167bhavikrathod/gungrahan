@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Share2, Heart, Sparkles, Clock, Edit3, PenLine } from 'lucide-react';
 import { formatRelativeTime, buildWhatsAppShareUrl } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
@@ -13,12 +13,20 @@ export default function GunaCard({
   onRajipoIncrement,
   onEdit,
 }) {
-  const [hasLiked, setHasLiked] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const likedList = JSON.parse(localStorage.getItem('gunagrahan_liked_ids') || '[]');
-    return likedList.includes(guna.id);
-  });
+  const [hasLiked, setHasLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(guna.rajipo_count || 0);
+
+  // Sync like state from localStorage on client mount to avoid hydration mismatch
+  useEffect(() => {
+    try {
+      const likedList = JSON.parse(localStorage.getItem('gunagrahan_liked_ids') || '[]');
+      if (likedList.includes(guna.id)) {
+        setHasLiked(true);
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [guna.id]);
 
   // Handle Rajipo button tap
   const handleRajipo = async () => {

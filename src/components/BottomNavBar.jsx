@@ -10,8 +10,8 @@ export default function BottomNavBar() {
   const pathname = usePathname();
   const { theme, openAddModal } = useAppContext();
 
-  // Hide on print
-  if (typeof window !== 'undefined' && pathname === '/report') {
+  // Hide on report page
+  if (pathname === '/report') {
     return null;
   }
 
