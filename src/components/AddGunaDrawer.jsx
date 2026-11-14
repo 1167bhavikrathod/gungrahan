@@ -445,7 +445,7 @@ export default function AddGunaDrawer({
                   className="mt-1.5 w-full py-1.5 px-3 rounded-xl text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 hover:bg-amber-200 transition flex items-center justify-center gap-1 font-gujarati shadow-2xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>+ &quot;{recipientSearch.trim()}&quot; નવું નામ લિસ્ટમાં ઉમેરો અને સિલેક્ટ કરો</span>
+                  <span>&quot;{recipientSearch.trim()}&quot; નવું નામ લિસ્ટમાં ઉમેરો અને સિલેક્ટ કરો</span>
                 </button>
               )}
             </div>

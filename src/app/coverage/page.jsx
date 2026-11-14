@@ -180,7 +180,7 @@ export default function CoveragePage() {
                       className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition active:scale-95 shadow-xs font-gujarati ${theme.primaryGradient}`}
                     >
                       <PlusCircle className="w-3.5 h-3.5 text-amber-200" />
-                      <span>+ ગુણ લખો</span>
+                      <span>ગુણ લખો</span>
                     </button>
                   </div>
                 );

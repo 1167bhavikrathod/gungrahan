@@ -408,7 +408,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
                 >
                   <UserPlus className="w-4 h-4 text-amber-200" />
                   <span className="font-gujarati text-white">
-                    + &quot;{searchQuery.trim()}&quot; નવું નામ ઉમેરો
+                    &quot;{searchQuery.trim()}&quot; નવું નામ ઉમેરો
                   </span>
                 </button>
               </div>

@@ -72,7 +72,7 @@ export default function HeroActionCard({
           <PlusCircle className="w-5 h-5 text-amber-200" />
         </div>
         <span className="font-gujarati tracking-wide text-white text-base sm:text-lg">
-          + નવો ગુણ ઉમેરો
+          નવો ગુણ ઉમેરો
         </span>
       </button>
 
