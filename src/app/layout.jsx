@@ -23,7 +23,8 @@ export const metadata = {
   title: 'ગુણગ્રહણ એપ | Gunagrahan WebApp',
   description: 'રમતોત્સવ ૨૦૨૬ — ગુણગ્રહણ મહોત્સવ: ગુણના ભિખારી બનીએ',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 };
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LogOut,
@@ -54,13 +55,25 @@ export default function StickyHeader() {
     <header className={`sticky top-0 z-40 transition-colors ${theme.headerBg}`}>
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand Block */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <span className="font-extrabold text-lg sm:text-xl tracking-tight text-stone-900">
-            ગુણગ્રહણ એપ
-          </span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs ${theme.primarySoftBg}`}>
-            {theme.wingLabelGujarati}
-          </span>
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/90 border border-amber-900/10 shadow-2xs p-1 transition-transform group-hover:scale-105 shrink-0">
+            <Image
+              src="/logo.png"
+              alt="ગુણગ્રહણ લોગો"
+              width={36}
+              height={36}
+              className="w-8 h-8 object-contain"
+              priority
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-stone-900">
+              ગુણગ્રહણ એપ
+            </span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs ${theme.primarySoftBg}`}>
+              {theme.wingLabelGujarati}
+            </span>
+          </div>
         </Link>
 
         {/* Center: Desktop Navigation Tabs */}
