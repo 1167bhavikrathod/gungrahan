@@ -109,7 +109,7 @@ export default function HeroActionCard({
           </div>
 
           {/* 4 Interactive Living Checkpoint Nodes */}
-          <div className="grid grid-cols-4 gap-1 pt-3 text-center">
+          <div className="grid grid-cols-4 gap-0.5 sm:gap-1 pt-3 text-center">
             {treeStages.map((stage) => {
               const isReached = totalWrittenCount >= stage.target;
               return (
@@ -120,7 +120,7 @@ export default function HeroActionCard({
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-xs transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ${
                       isReached
                         ? 'bg-amber-100 border-2 border-amber-500 shadow-amber-500/20'
                         : 'bg-stone-100 border border-stone-200'
@@ -129,7 +129,7 @@ export default function HeroActionCard({
                     <span>{stage.icon}</span>
                   </div>
                   <span
-                    className={`text-[11px] font-bold font-gujarati mt-1 ${
+                    className={`text-[10px] sm:text-[11px] font-bold font-gujarati mt-1 leading-tight text-center ${
                       isReached ? 'text-amber-900' : 'text-stone-400'
                     }`}
                   >

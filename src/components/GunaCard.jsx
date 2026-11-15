@@ -68,7 +68,7 @@ export default function GunaCard({
       {/* 1. Top Row: Recipient Pill & Relative Time */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-950 border border-amber-200/90 font-gujarati shrink-0 shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-950 border border-amber-200/90 font-gujarati shrink min-w-0 shadow-2xs">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
             <span className="truncate">{guna.recipient_name} નો ગુણ</span>
           </div>
@@ -94,9 +94,9 @@ export default function GunaCard({
       </div>
 
       {/* 3. Bottom Action Row: Balanced and Non-Crowding */}
-      <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-2">
+      <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-1.5 sm:gap-2">
         {/* Writer Attribution */}
-        <div className="flex items-center gap-1 text-xs text-stone-500 font-gujarati min-w-0 pr-1">
+        <div className="flex items-center gap-1 text-xs text-stone-500 font-gujarati min-w-0 shrink">
           <PenLine className="w-3.5 h-3.5 text-amber-700 shrink-0" />
           <span className="text-amber-900/80 font-medium shrink-0">લખનાર:</span>
           <span className="font-bold text-stone-800 truncate">
@@ -108,7 +108,7 @@ export default function GunaCard({
         </div>
 
         {/* Right Action Cluster */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {/* Edit Button for Author */}
           {isMyWritten && onEdit && (
             <button
@@ -133,7 +133,7 @@ export default function GunaCard({
           <button
             onClick={handleRajipo}
             disabled={hasLiked}
-            className={`h-8 px-2.5 rounded-xl flex items-center gap-1.5 text-xs font-bold border transition-all active:scale-95 shadow-2xs font-gujarati ${
+            className={`h-8 px-2 sm:px-2.5 rounded-xl flex items-center gap-1 sm:gap-1.5 text-xs font-bold border transition-all active:scale-95 shadow-2xs font-gujarati ${
               hasLiked
                 ? 'bg-rose-50 text-rose-700 border-rose-200 cursor-default'
                 : 'bg-stone-50 text-stone-700 hover:bg-rose-50 hover:text-rose-700 border-stone-200/90'
@@ -147,7 +147,7 @@ export default function GunaCard({
                   : 'text-stone-400 group-hover:text-rose-500'
               }`}
             />
-            <span>રાજીપો ({likeCount})</span>
+            <span className="whitespace-nowrap">રાજીપો ({likeCount})</span>
           </button>
         </div>
       </div>

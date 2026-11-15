@@ -74,10 +74,10 @@ export default function PublicGunaFeed({
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-amber-50/70 border border-amber-900/10 rounded-2xl overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-amber-50/70 border border-amber-900/10 rounded-2xl overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('all')}
-            className={`flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition font-gujarati text-center ${
+            className={`flex-1 min-w-[85px] sm:min-w-[100px] py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition font-gujarati text-center whitespace-nowrap shrink-0 sm:shrink ${
               activeTab === 'all'
                 ? theme.pillActive
                 : 'text-stone-600 hover:text-stone-900 hover:bg-amber-100/50'
@@ -88,7 +88,7 @@ export default function PublicGunaFeed({
 
           <button
             onClick={() => setActiveTab('my-written')}
-            className={`flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition font-gujarati text-center ${
+            className={`flex-1 min-w-[85px] sm:min-w-[100px] py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition font-gujarati text-center whitespace-nowrap shrink-0 sm:shrink ${
               activeTab === 'my-written'
                 ? theme.pillActive
                 : 'text-stone-600 hover:text-stone-900 hover:bg-amber-100/50'
@@ -99,7 +99,7 @@ export default function PublicGunaFeed({
 
           <button
             onClick={() => setActiveTab('about-me')}
-            className={`flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition font-gujarati text-center ${
+            className={`flex-1 min-w-[85px] sm:min-w-[100px] py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition font-gujarati text-center whitespace-nowrap shrink-0 sm:shrink ${
               activeTab === 'about-me'
                 ? theme.pillActive
                 : 'text-stone-600 hover:text-stone-900 hover:bg-amber-100/50'

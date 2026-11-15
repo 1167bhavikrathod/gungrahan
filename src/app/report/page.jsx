@@ -111,41 +111,41 @@ export default function ReportPage() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] py-4 sm:py-8 px-2 sm:px-4 print:p-0 print:bg-white">
       {/* 1. Interactive Control Toolbar (Hidden in Print) */}
-      <div className="max-w-4xl mx-auto mb-6 p-4 rounded-3xl bg-white shadow-sm border border-amber-900/10 print:hidden space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="max-w-4xl mx-auto mb-6 p-3.5 sm:p-4 rounded-3xl bg-white shadow-sm border border-amber-900/10 print:hidden space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-stone-700 hover:text-amber-800 transition font-gujarati"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-stone-700 hover:text-amber-800 transition font-gujarati"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 shrink-0" />
             <span>ડેશબોર્ડ પર પાછા જાઓ</span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50/80 hover:bg-amber-100 text-amber-950 border border-amber-200/80 transition font-gujarati"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-50/80 hover:bg-amber-100 text-amber-950 border border-amber-200/80 transition font-gujarati"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 shrink-0" />
               <span>CSV એક્સપોર્ટ</span>
             </button>
 
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition font-gujarati"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition font-gujarati whitespace-nowrap"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-4 h-4 shrink-0" />
               <span>🖨️ પ્રિન્ટ / PDF ડાઉનલોડ</span>
             </button>
           </div>
         </div>
 
         {/* View Mode Selector */}
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-100">
-          <span className="text-xs font-semibold text-stone-500 font-gujarati">ફોર્મેટ:</span>
+        <div className="flex items-center gap-1.5 pt-2 border-t border-amber-100 overflow-x-auto no-scrollbar">
+          <span className="text-xs font-semibold text-stone-500 font-gujarati shrink-0">ફોર્મેટ:</span>
           <button
             onClick={() => setViewMode('bapa-letter')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati whitespace-nowrap shrink-0 ${
               viewMode === 'bapa-letter'
                 ? 'bg-amber-600 text-white shadow-xs'
                 : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
@@ -155,7 +155,7 @@ export default function ReportPage() {
           </button>
           <button
             onClick={() => setViewMode('chronological')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati whitespace-nowrap shrink-0 ${
               viewMode === 'chronological'
                 ? 'bg-amber-600 text-white shadow-xs'
                 : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
@@ -165,7 +165,7 @@ export default function ReportPage() {
           </button>
           <button
             onClick={() => setViewMode('by-writer')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition font-gujarati whitespace-nowrap shrink-0 ${
               viewMode === 'by-writer'
                 ? 'bg-amber-600 text-white shadow-xs'
                 : 'bg-amber-50/70 text-stone-700 hover:bg-amber-100/70 border border-amber-200/50'
@@ -177,7 +177,7 @@ export default function ReportPage() {
       </div>
 
       {/* 2. Sacred Print Layout (A4 Container) */}
-      <div className="max-w-4xl mx-auto bg-white p-6 sm:p-10 border-4 border-double border-amber-700/80 shadow-xl rounded-2xl print:border-none print:shadow-none print:p-0 print:m-0 space-y-6">
+      <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8 md:p-10 border-2 sm:border-4 border-double border-amber-700/80 shadow-xl rounded-2xl print:border-none print:shadow-none print:p-0 print:m-0 space-y-5 sm:space-y-6">
         {/* Sacred Invocation Header */}
         <div className="text-center pb-4 border-b-2 border-amber-600/60 space-y-1">
           <p className="text-sm font-bold text-amber-800 tracking-wider font-gujarati">
@@ -241,8 +241,8 @@ export default function ReportPage() {
             </h2>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-amber-200/80">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm font-gujarati">
+          <div className="overflow-x-auto no-scrollbar rounded-xl border border-amber-200/80">
+            <table className="w-full min-w-[480px] text-left border-collapse text-xs sm:text-sm font-gujarati">
               <thead>
                 <tr className="bg-amber-100/70 text-amber-950 border-b border-amber-200">
                   <th className="p-2.5 text-center w-12">ક્રમ</th>

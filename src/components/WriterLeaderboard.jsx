@@ -37,7 +37,7 @@ export default function WriterLeaderboard({
             <Trophy className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-stone-900 font-gujarati flex items-center gap-1.5">
+            <h2 className="text-sm sm:text-base font-bold text-stone-900 font-gujarati flex items-center gap-1.5 flex-wrap">
               ગુણ લેખક લીડરબોર્ડ
               <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-bold">
                 ગુણના ભિખારી

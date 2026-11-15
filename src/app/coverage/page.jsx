@@ -159,17 +159,17 @@ export default function CoveragePage() {
                 return (
                   <div
                     key={karyakar.id}
-                    className="p-3.5 sm:p-4 bg-white rounded-2xl border border-amber-900/10 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.04)] hover:border-amber-300 transition flex items-center justify-between gap-3"
+                    className="p-3.5 sm:p-4 bg-white rounded-2xl border border-amber-900/10 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.04)] hover:border-amber-300 transition flex items-center justify-between gap-2.5 sm:gap-3"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs ${theme.avatarBadge}`}>
                         {initial}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-stone-900 font-gujarati truncate">
                           {karyakar.name}
                         </p>
-                        <p className="text-xs text-amber-800 font-gujarati font-medium">
+                        <p className="text-xs text-amber-800 font-gujarati font-medium truncate">
                           હજુ સુધી ગુણ લખાયો નથી
                         </p>
                       </div>
@@ -177,10 +177,10 @@ export default function CoveragePage() {
 
                     <button
                       onClick={() => openAddModal(karyakar.id)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition active:scale-95 shadow-xs font-gujarati ${theme.primaryGradient}`}
+                      className={`px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 sm:gap-1.5 shrink-0 transition active:scale-95 shadow-xs font-gujarati ${theme.primaryGradient}`}
                     >
-                      <PlusCircle className="w-3.5 h-3.5 text-amber-200" />
-                      <span>ગુણ લખો</span>
+                      <PlusCircle className="w-3.5 h-3.5 text-amber-200 shrink-0" />
+                      <span className="whitespace-nowrap">ગુણ લખો</span>
                     </button>
                   </div>
                 );
@@ -210,25 +210,25 @@ export default function CoveragePage() {
                     key={karyakar.id}
                     className="p-3.5 sm:p-4 bg-white rounded-2xl border border-emerald-200/80 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.04)] space-y-2.5"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center justify-between gap-2.5 sm:gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
                           {initial}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-bold text-stone-900 font-gujarati truncate">
                             {karyakar.name}
                           </p>
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 font-gujarati">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            {writtenGunas.length} ગુણ લખાયા
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 font-gujarati truncate">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>{writtenGunas.length} ગુણ લખાયા</span>
                           </span>
                         </div>
                       </div>
 
                       <button
                         onClick={() => openAddModal(karyakar.id)}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-blue-800 bg-blue-50 border border-blue-200/90 hover:bg-blue-100 transition font-gujarati shrink-0 shadow-2xs"
+                        className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-blue-800 bg-blue-50 border border-blue-200/90 hover:bg-blue-100 transition font-gujarati shrink-0 shadow-2xs whitespace-nowrap"
                       >
                         + બીજો ગુણ લખો
                       </button>

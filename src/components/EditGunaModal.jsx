@@ -297,7 +297,7 @@ export default function EditGunaModal({
                   key={i}
                   type="button"
                   onClick={() => handleAddStarter(starter)}
-                  className="px-2.5 py-1 rounded-xl text-xs bg-amber-50/80 text-amber-950 hover:bg-amber-100/90 border border-amber-200/80 font-gujarati transition shadow-2xs"
+                  className="px-3 py-1.5 min-h-[36px] rounded-xl text-xs bg-amber-50/80 text-amber-950 hover:bg-amber-100/90 active:scale-95 border border-amber-200/80 font-gujarati transition shadow-2xs"
                 >
                   &ldquo;{starter}&rdquo;
                 </button>
@@ -312,7 +312,7 @@ export default function EditGunaModal({
                 key={tag}
                 type="button"
                 onClick={() => handleAddTag(tag)}
-                className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200 font-gujarati transition"
+                className="px-3 py-1.5 min-h-[32px] rounded-xl text-[11px] font-semibold bg-stone-50 text-stone-700 hover:bg-amber-50 active:scale-95 border border-stone-200 font-gujarati transition"
               >
                 #{tag}
               </button>

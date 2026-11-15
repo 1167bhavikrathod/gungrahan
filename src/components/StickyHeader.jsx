@@ -58,24 +58,24 @@ export default function StickyHeader() {
 
   return (
     <header className={`sticky top-0 z-40 transition-colors ${theme.headerBg}`}>
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-5xl mx-auto px-2.5 sm:px-4 h-16 flex items-center justify-between gap-1.5 sm:gap-4 min-w-0">
         {/* Left: Brand Block */}
-        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/90 border border-amber-900/10 shadow-2xs p-1 transition-transform group-hover:scale-105 shrink-0">
+        <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group min-w-0 shrink">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center bg-white/90 border border-amber-900/10 shadow-2xs p-1 transition-transform group-hover:scale-105 shrink-0">
             <Image
               src="/logo.png"
               alt="ગુણગ્રહણ લોગો"
-              width={36}
-              height={36}
-              className="w-8 h-8 object-contain"
+              width={32}
+              height={32}
+              className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
               priority
             />
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-base sm:text-lg tracking-tight text-stone-900">
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+            <span className="font-extrabold text-xs sm:text-base md:text-lg tracking-tight text-stone-900 truncate leading-tight">
               ગુણગ્રહણ એપ
             </span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs ${theme.primarySoftBg}`}>
+            <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold shadow-2xs shrink-0 whitespace-nowrap ${theme.primarySoftBg}`}>
               {theme.wingLabelGujarati}
             </span>
           </div>
@@ -106,22 +106,22 @@ export default function StickyHeader() {
         {/* Right: User Cluster */}
         {currentUser && (
           <div className="relative shrink-0" ref={menuRef}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Admin Quick Entry Button if Admin */}
               {isAdminUser && (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 border border-amber-400/70 shadow-2xs hover:shadow-xs transition-all active:scale-95"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 border border-amber-400/70 shadow-2xs hover:shadow-xs transition-all active:scale-95 shrink-0"
                   title="એડમિન કંટ્રોલ પેનલ (સર્વ નિયંત્રણ)"
                 >
-                  <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-                  <span className="font-gujarati font-extrabold hidden xs:inline">એડમિન</span>
+                  <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0" />
+                  <span className="font-gujarati font-extrabold hidden md:inline">એડમિન</span>
                 </Link>
               )}
 
               {/* Writer Milestone Pill Badge */}
               <div
-                className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs transition ${myWriterBadge.colorClass}`}
+                className={`hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs transition ${myWriterBadge.colorClass}`}
                 title={`તમારું લેખક પદવી: ${myWriterBadge.title}`}
               >
                 <span>{myWriterBadge.icon}</span>
@@ -131,22 +131,21 @@ export default function StickyHeader() {
               {/* Avatar Pill Button: Elegant Handmade Medallion */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full bg-amber-50/90 hover:bg-amber-100/90 border border-amber-200/90 shadow-2xs hover:shadow-xs transition-all active:scale-95 focus:outline-none ${
+                className={`flex items-center gap-1 sm:gap-1.5 pl-1 pr-1.5 sm:pr-2.5 py-1 rounded-full bg-amber-50/90 hover:bg-amber-100/90 border border-amber-200/90 shadow-2xs hover:shadow-xs transition-all active:scale-95 focus:outline-none shrink-0 ${
                   isMenuOpen ? 'ring-2 ring-amber-400/50 bg-amber-100' : ''
                 }`}
                 aria-label="User profile menu"
               >
                 <div
-                  className={`w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 select-none ${theme.avatarBadge}`}
-                  style={{ width: '32px', height: '32px' }}
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 select-none ${theme.avatarBadge}`}
                 >
                   {userInitial}
                 </div>
-                <span className="text-xs font-bold text-stone-800 font-gujarati max-w-[70px] sm:max-w-[100px] truncate leading-none">
+                <span className="text-xs font-bold text-stone-800 font-gujarati max-w-[45px] sm:max-w-[100px] truncate leading-none">
                   {currentUser.name}
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-amber-900/60 transition-transform duration-200 shrink-0 ${
+                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-900/60 transition-transform duration-200 shrink-0 ${
                     isMenuOpen ? 'rotate-180 text-amber-700' : ''
                   }`}
                 />

@@ -883,8 +883,8 @@ export default function AdminPage() {
               </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm font-gujarati">
+            <div className="overflow-x-auto no-scrollbar rounded-xl border border-stone-200/80">
+              <table className="w-full min-w-[360px] text-left text-xs sm:text-sm font-gujarati">
                 <thead>
                   <tr className="border-b border-stone-200 text-stone-500 text-xs">
                     <th className="py-2.5 px-3">સભાનું નામ</th>
@@ -1156,8 +1156,8 @@ export default function AdminPage() {
 
           {/* Karyakars Table Card */}
           <div className="bg-white rounded-3xl border border-amber-900/10 shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm font-gujarati">
+            <div className="overflow-x-auto no-scrollbar">
+              <table className="w-full min-w-[640px] text-left text-xs sm:text-sm font-gujarati">
                 <thead className="bg-amber-50/60 border-b border-amber-900/10 text-stone-600 text-xs">
                   <tr>
                     <th className="py-3 px-4 font-bold">નામ</th>
@@ -1365,9 +1365,9 @@ export default function AdminPage() {
       {/* MODAL 1: ADD NEW KARYAKAR MODAL                         */}
       {/* ======================================================== */}
       {isAddKaryakarOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-amber-200" />
                 <h3 className="font-extrabold text-base font-gujarati">નવો કાર્યકર ઉમેરો</h3>
@@ -1380,7 +1380,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateKaryakar} className="p-5 space-y-3.5">
+            <form onSubmit={handleCreateKaryakar} className="p-4 sm:p-5 space-y-3.5 flex-1 overflow-y-auto">
               <div>
                 <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
                   પૂરું નામ (ગુજરાતીમાં) *
@@ -1473,9 +1473,9 @@ export default function AdminPage() {
       {/* MODAL 2: EDIT KARYAKAR MODAL                            */}
       {/* ======================================================== */}
       {editingKaryakarItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-amber-200" />
                 <h3 className="font-extrabold text-base font-gujarati">કાર્યકર વિગત સુધારો</h3>
@@ -1488,7 +1488,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditKaryakar} className="p-5 space-y-3.5">
+            <form onSubmit={handleSaveEditKaryakar} className="p-4 sm:p-5 space-y-3.5 flex-1 overflow-y-auto">
               <div>
                 <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
                   નામ
@@ -1613,9 +1613,9 @@ export default function AdminPage() {
       {/* MODAL 4: EDIT GUNA MODAL                                */}
       {/* ======================================================== */}
       {editingGunaItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-amber-200" />
                 <h3 className="font-extrabold text-base font-gujarati">ગુણ સંપાદન (Admin Edit)</h3>
@@ -1628,7 +1628,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveGunaModal} className="p-5 space-y-3.5">
+            <form onSubmit={handleSaveGunaModal} className="p-4 sm:p-5 space-y-3.5 flex-1 overflow-y-auto">
               <div>
                 <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
                   પ્રાપ્તકર્તા કાર્યકર (Recipient)
