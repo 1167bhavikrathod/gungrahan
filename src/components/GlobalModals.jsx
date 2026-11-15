@@ -4,6 +4,7 @@ import React from 'react';
 import { useAppContext } from '@/context/AppContext';
 import AddGunaDrawer from '@/components/AddGunaDrawer';
 import EditGunaModal from '@/components/EditGunaModal';
+import EditNameModal from '@/components/EditNameModal';
 import LoginGateModal from '@/components/LoginGateModal';
 
 export default function GlobalModals() {
@@ -24,6 +25,9 @@ export default function GlobalModals() {
     editingGuna,
     setEditingGuna,
     handleSaveEditedGuna,
+    isEditNameModalOpen,
+    setIsEditNameModalOpen,
+    updateUserName,
   } = useAppContext();
 
   return (
@@ -59,6 +63,15 @@ export default function GlobalModals() {
         guna={editingGuna}
         onClose={() => setEditingGuna(null)}
         onSave={handleSaveEditedGuna}
+        theme={theme}
+      />
+
+      {/* Edit Name Modal */}
+      <EditNameModal
+        isOpen={isEditNameModalOpen}
+        onClose={() => setIsEditNameModalOpen(false)}
+        currentUser={currentUser}
+        onSave={updateUserName}
         theme={theme}
       />
     </>

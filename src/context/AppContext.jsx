@@ -25,6 +25,7 @@ export function AppProvider({ children }) {
   const [preselectedRecipientId, setPreselectedRecipientId] = useState(null);
   const [onlyUnwrittenFilter, setOnlyUnwrittenFilter] = useState(false);
   const [editingGuna, setEditingGuna] = useState(null);
+  const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
 
   // 1. Initial LocalStorage Hydration
   useEffect(() => {
@@ -178,6 +179,99 @@ export function AppProvider({ children }) {
       localStorage.removeItem('gunagrahan_user_v1');
     } catch (e) {}
   }, []);
+
+  // Update Current User Name Handler
+  const updateUserName = useCallback(
+    async (newName) => {
+      const trimmed = newName.trim();
+      if (!trimmed || !currentUser) return false;
+      if (trimmed === currentUser.name) return true;
+
+      const oldName = currentUser.name;
+      const updatedUser = { ...currentUser, name: trimmed };
+
+      // 1. Update currentUser in state & localStorage
+      setCurrentUser(updatedUser);
+      try {
+        localStorage.setItem('gunagrahan_user_v1', JSON.stringify(updatedUser));
+      } catch (e) {}
+
+      // 2. Update karyakars list in state
+      setKaryakars((prev) =>
+        prev.map((k) =>
+          k.id === currentUser.id || k.name === oldName
+            ? { ...k, name: trimmed }
+            : k
+        )
+      );
+
+      // 3. Update existing gunas in state & localStorage
+      setGunas((prev) => {
+        const updatedGunas = prev.map((g) => {
+          let modified = false;
+          let updated = { ...g };
+          if (g.author_id === currentUser.id || g.author_name === oldName) {
+            updated.author_name = trimmed;
+            modified = true;
+          }
+          if (g.recipient_id === currentUser.id || g.recipient_name === oldName) {
+            updated.recipient_name = trimmed;
+            modified = true;
+          }
+          return modified ? updated : g;
+        });
+
+        if (!isSupabaseConfigured) {
+          try {
+            localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updatedGunas));
+          } catch (e) {}
+        }
+        return updatedGunas;
+      });
+
+      // 4. Update Supabase if configured
+      if (isSupabaseConfigured) {
+        try {
+          if (currentUser.id) {
+            await supabase
+              .from('karyakars')
+              .update({ name: trimmed })
+              .eq('id', currentUser.id);
+
+            await supabase
+              .from('gunas')
+              .update({ author_name: trimmed })
+              .eq('author_id', currentUser.id);
+
+            await supabase
+              .from('gunas')
+              .update({ recipient_name: trimmed })
+              .eq('recipient_id', currentUser.id);
+          } else {
+            await supabase
+              .from('karyakars')
+              .update({ name: trimmed })
+              .eq('name', oldName);
+
+            await supabase
+              .from('gunas')
+              .update({ author_name: trimmed })
+              .eq('author_name', oldName);
+
+            await supabase
+              .from('gunas')
+              .update({ recipient_name: trimmed })
+              .eq('recipient_name', oldName);
+          }
+        } catch (err) {
+          console.error('Failed to sync updated name to Supabase:', err);
+        }
+      }
+
+      return true;
+    },
+    [currentUser, wing]
+  );
 
   // Guna Submitted Handler
   const handleGunaSubmitted = useCallback(
@@ -359,6 +453,10 @@ export function AppProvider({ children }) {
     onlyUnwrittenFilter,
     editingGuna,
     setEditingGuna,
+    isEditNameModalOpen,
+    setIsEditNameModalOpen,
+    openEditNameModal: () => setIsEditNameModalOpen(true),
+    updateUserName,
     openAddModal,
     openCoverageAddModal,
     handleGunaSubmitted,

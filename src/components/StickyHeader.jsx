@@ -13,6 +13,7 @@ import {
   MessageSquareQuote,
   Trophy,
   Target,
+  Pencil,
 } from 'lucide-react';
 import { getFirstGrapheme } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
@@ -26,6 +27,7 @@ export default function StickyHeader() {
     myCoverageStats,
     theme,
     logoutUser,
+    openEditNameModal,
   } = useAppContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -141,9 +143,22 @@ export default function StickyHeader() {
               <div className="absolute right-0 mt-2 w-72 bg-white rounded-3xl shadow-xl border border-amber-900/10 py-2 z-50 animate-fadeIn overflow-hidden">
                 <div className="px-4 py-3 border-b border-amber-100/70 bg-gradient-to-r from-amber-50/60 to-orange-50/30">
                   <p className="text-[11px] text-amber-900/70 font-semibold">લોગિન કરેલ કાર્યકર</p>
-                  <p className="text-sm font-bold text-stone-900 truncate font-gujarati mt-0.5">
-                    {currentUser.name}
-                  </p>
+                  <div className="flex items-center justify-between mt-0.5">
+                    <p className="text-sm font-bold text-stone-900 truncate font-gujarati">
+                      {currentUser.name}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        openEditNameModal();
+                      }}
+                      className="p-1 text-amber-700 hover:text-amber-900 hover:bg-amber-100/70 rounded-lg transition"
+                      title="તમારું નામ સુધારો"
+                      aria-label="Edit Name"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                   <div className="flex items-center gap-1.5 mt-2">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${myWriterBadge.colorClass}`}>
                       {myWriterBadge.icon} {myWriterBadge.title}
@@ -173,7 +188,18 @@ export default function StickyHeader() {
                   </div>
                 </div>
 
-                <div className="py-1 text-sm font-gujarati">
+                <div className="py-1 text-sm font-gujarati divide-y divide-stone-100">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      openEditNameModal();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition text-left font-bold"
+                  >
+                    <Pencil className="w-4 h-4 text-amber-600" />
+                    <span>તમારું નામ સુધારો</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
@@ -182,7 +208,7 @@ export default function StickyHeader() {
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-rose-600 hover:bg-rose-50 transition text-left font-bold"
                   >
                     <LogOut className="w-4 h-4 text-rose-500" />
-                    <span>નામ બદલો / લોગઆઉટ</span>
+                    <span>બીજા આઈડીથી લોગિન / લોગઆઉટ</span>
                   </button>
                 </div>
               </div>

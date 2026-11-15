@@ -9,6 +9,7 @@ import {
   Target,
   CheckCircle2,
   Award,
+  Pencil,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import HeroActionCard from '@/components/HeroActionCard';
@@ -29,6 +30,7 @@ export default function HomePage() {
     openCoverageAddModal,
     handleRajipoIncrement,
     setEditingGuna,
+    openEditNameModal,
   } = useAppContext();
 
   // Find user's rank on leaderboard
@@ -52,9 +54,19 @@ export default function HomePage() {
             <p className="text-xs text-amber-900/70 font-semibold font-gujarati">
               જય સ્વામિનારાયણ,
             </p>
-            <h1 className="text-base sm:text-lg font-bold text-stone-900 font-gujarati truncate">
-              {currentUser.name}
-            </h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <h1 className="text-base sm:text-lg font-bold text-stone-900 font-gujarati truncate">
+                {currentUser.name}
+              </h1>
+              <button
+                onClick={openEditNameModal}
+                className="p-1 rounded-lg text-amber-700/70 hover:text-amber-900 hover:bg-amber-100/80 transition shrink-0"
+                title="તમારું નામ સુધારો"
+                aria-label="Edit your name"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           <div
