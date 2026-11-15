@@ -159,3 +159,52 @@ export function getNextBadgeMotivation(count = 0, rank = null) {
   const remaining = badge.targetNext - count;
   return `🌟 ${rankStr}'${badge.nextTitle}' બનવા બીજા ${remaining} ગુણ લખો!`;
 }
+
+/**
+ * Helper to strip punctuation and normalize word for duplicate comparison
+ */
+function cleanWordForCompare(w) {
+  return (w || '').replace(/[.,/#!$%^&*;:{}=\-_`~()?'"॥।]/g, '').toLowerCase();
+}
+
+/**
+ * 5. appendSpeechTranscript(existingText, newChunk)
+ * Appends newly recognized speech to existing text without duplicating:
+ * - Prevents exact duplicate phrases (from continuous recognition quirks or speech engine stutter)
+ * - Detects and stitches boundary word-level overlaps (when recognition re-transcribes the end of the previous sentence)
+ * - Handles trailing punctuation and spacing cleanly so previously spoken text is never overwritten
+ */
+export function appendSpeechTranscript(existingText, newChunk) {
+  const existing = (existingText || '').trim();
+  const incoming = (newChunk || '').trim();
+
+  if (!existing) return incoming;
+  if (!incoming) return existing;
+
+  // Exact duplicate or suffix check: if existing text already ends with this incoming chunk
+  if (existing.endsWith(incoming)) {
+    return existing;
+  }
+
+  // Word-level overlap check at the boundary:
+  // e.g. existing ends with "કાર્યકર છે" and incoming starts with "કાર્યકર છે અને સેવાભાવી છે"
+  const existingWords = existing.split(/\s+/);
+  const incomingWords = incoming.split(/\s+/);
+
+  const maxOverlap = Math.min(existingWords.length, incomingWords.length);
+  for (let len = maxOverlap; len >= 1; len--) {
+    const existingEndClean = existingWords.slice(-len).map(cleanWordForCompare).join(' ');
+    const incomingStartClean = incomingWords.slice(0, len).map(cleanWordForCompare).join(' ');
+
+    if (existingEndClean && existingEndClean === incomingStartClean) {
+      if (len === incomingWords.length) {
+        return existing;
+      }
+      const remainingWords = incomingWords.slice(len).join(' ');
+      return `${existing} ${remainingWords}`;
+    }
+  }
+
+  return `${existing} ${incoming}`;
+}
+

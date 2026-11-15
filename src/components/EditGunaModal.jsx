@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Mic, MicOff, Edit3, Save, Check } from 'lucide-react';
 import { SENTENCE_STARTERS, VIRTUE_QUALITY_CHIPS } from '@/config/seedKaryakars';
+import { appendSpeechTranscript } from '@/lib/utils';
 
 export default function EditGunaModal({
   isOpen,
@@ -19,15 +20,19 @@ export default function EditGunaModal({
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const isRecordingRef = useRef(false);
-  const baseContentRef = useRef('');
+  const finalTranscriptRef = useRef('');
+  const lastFinalIndexRef = useRef(-1);
+  const restartTimerRef = useRef(null);
 
   useEffect(() => {
     if (guna && isOpen) {
-      setContent(guna.content || '');
-      baseContentRef.current = guna.content || '';
+      const initial = guna.content || '';
+      setContent(initial);
+      finalTranscriptRef.current = initial.trim();
     } else {
       setContent('');
       stopVoiceRecording();
+      finalTranscriptRef.current = '';
     }
   }, [guna, isOpen]);
 
@@ -49,25 +54,38 @@ export default function EditGunaModal({
   const stopVoiceRecording = () => {
     isRecordingRef.current = false;
     setIsRecording(false);
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {}
+
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
     }
+
+    if (recognitionRef.current) {
+      const rec = recognitionRef.current;
+      recognitionRef.current = null;
+      rec.onresult = null;
+      rec.onerror = null;
+      rec.onend = null;
+      try {
+        rec.stop();
+      } catch (e) {
+        try {
+          rec.abort();
+        } catch (e2) {}
+      }
+    }
+
+    // Cleanly finalize content without trailing whitespace
+    setContent((prev) => (finalTranscriptRef.current || prev || '').trim());
   };
 
-  // Start continuous voice recording
-  const startVoiceRecording = () => {
+  // Helper to initialize and start a SpeechRecognition instance cleanly
+  const initRecognition = () => {
+    if (!isRecordingRef.current) return;
+
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('તમારા બ્રાઉઝરમાં માઇક્રોફોન સ્પીચ સપોર્ટ નથી. કૃપા કરીને Google Chrome અથવા Edge વાપરો.');
-      return;
-    }
-
-    baseContentRef.current = content;
-    isRecordingRef.current = true;
-    setIsRecording(true);
+    if (!SpeechRecognition) return;
 
     try {
       const recognition = new SpeechRecognition();
@@ -75,24 +93,39 @@ export default function EditGunaModal({
       recognition.interimResults = true;
       recognition.lang = 'gu-IN';
 
-      recognition.onresult = (event) => {
-        let finalSpeech = '';
-        let interimSpeech = '';
+      lastFinalIndexRef.current = -1;
 
-        for (let i = 0; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalSpeech += event.results[i][0].transcript + ' ';
+      recognition.onresult = (event) => {
+        if (!isRecordingRef.current) return;
+        let interimText = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const result = event.results[i];
+          if (!result || !result[0]) continue;
+
+          if (result.isFinal) {
+            // Guard: in a single session, never process the same index twice
+            if (i > lastFinalIndexRef.current) {
+              lastFinalIndexRef.current = i;
+              const chunk = result[0].transcript.trim();
+              if (chunk) {
+                finalTranscriptRef.current = appendSpeechTranscript(
+                  finalTranscriptRef.current,
+                  chunk
+                );
+              }
+            }
           } else {
-            interimSpeech += event.results[i][0].transcript;
+            interimText += result[0].transcript;
           }
         }
 
-        const combined = (finalSpeech + interimSpeech).trim();
-        if (combined) {
-          const base = baseContentRef.current;
-          const separator = base && !base.endsWith(' ') ? ' ' : '';
-          setContent(base + separator + combined);
-        }
+        // Live display: combine finalized accumulator with interim speech
+        const combined = appendSpeechTranscript(
+          finalTranscriptRef.current,
+          interimText
+        );
+        setContent(combined);
       };
 
       recognition.onerror = (event) => {
@@ -106,28 +139,64 @@ export default function EditGunaModal({
       };
 
       recognition.onend = () => {
+        if (recognitionRef.current === recognition) {
+          recognitionRef.current = null;
+        }
+
+        // If user hasn't pressed stop button, auto-restart cleanly
+        // with finalTranscriptRef holding all previously finalized sentences so NO PREVIOUS SENTENCES ARE EVER OVERWRITTEN!
         if (isRecordingRef.current) {
-          try {
-            recognition.start();
-          } catch (e) {
-            stopVoiceRecording();
-          }
+          restartTimerRef.current = setTimeout(() => {
+            if (isRecordingRef.current) {
+              initRecognition();
+            }
+          }, 100);
         } else {
           setIsRecording(false);
         }
       };
 
-      recognition.start();
       recognitionRef.current = recognition;
+      recognition.start();
     } catch (err) {
       console.error('Failed to start speech:', err);
-      stopVoiceRecording();
+      if (isRecordingRef.current) {
+        restartTimerRef.current = setTimeout(() => {
+          if (isRecordingRef.current) {
+            initRecognition();
+          }
+        }, 300);
+      }
     }
+  };
+
+  // Start continuous voice recording
+  const startVoiceRecording = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('તમારા બ્રાઉઝરમાં માઇક્રોફોન સ્પીચ સપોર્ટ નથી. કૃપા કરીને Google Chrome અથવા Edge વાપરો.');
+      return;
+    }
+
+    if (isRecordingRef.current) {
+      stopVoiceRecording();
+      return;
+    }
+
+    // Capture initial textarea content so previous sentences/typing are never lost
+    const initialText = content.trim();
+    finalTranscriptRef.current = initialText;
+
+    isRecordingRef.current = true;
+    setIsRecording(true);
+
+    initRecognition();
   };
 
   // Toggle voice recording
   const handleToggleVoice = () => {
-    if (isRecording) {
+    if (isRecordingRef.current) {
       stopVoiceRecording();
     } else {
       startVoiceRecording();
@@ -137,9 +206,9 @@ export default function EditGunaModal({
   // Append sentence starter
   const handleAddStarter = (starter) => {
     setContent((prev) => {
-      const clean = prev.trim();
+      const clean = (finalTranscriptRef.current || prev || '').trim();
       const next = clean ? `${clean} ${starter}` : starter;
-      baseContentRef.current = next;
+      finalTranscriptRef.current = next;
       return next;
     });
     if (textareaRef.current) {
@@ -150,9 +219,9 @@ export default function EditGunaModal({
   // Append topic tag
   const handleAddTag = (tag) => {
     setContent((prev) => {
-      const clean = prev.trim();
+      const clean = (finalTranscriptRef.current || prev || '').trim();
       const next = clean ? `${clean} #${tag}` : `#${tag} `;
-      baseContentRef.current = next;
+      finalTranscriptRef.current = next.trim();
       return next;
     });
     if (textareaRef.current) {
@@ -290,7 +359,7 @@ export default function EditGunaModal({
               value={content}
               onChange={(e) => {
                 setContent(e.target.value);
-                baseContentRef.current = e.target.value;
+                finalTranscriptRef.current = e.target.value;
               }}
               className="w-full p-3.5 bg-stone-50/80 border border-stone-200 rounded-2xl text-sm font-gujarati text-stone-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 shadow-2xs"
               required

@@ -18,6 +18,7 @@ import {
   SENTENCE_STARTERS,
 } from '@/config/seedKaryakars';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
+import { appendSpeechTranscript } from '@/lib/utils';
 
 export default function AddGunaDrawer({
   isOpen,
@@ -44,16 +45,125 @@ export default function AddGunaDrawer({
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const isRecordingRef = useRef(false);
-  const baseContentRef = useRef('');
+  const finalTranscriptRef = useRef('');
+  const lastFinalIndexRef = useRef(-1);
+  const restartTimerRef = useRef(null);
 
   // Stop recording helper
   const stopVoiceRecording = () => {
     isRecordingRef.current = false;
     setIsRecording(false);
+
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+
     if (recognitionRef.current) {
+      const rec = recognitionRef.current;
+      recognitionRef.current = null;
+      rec.onresult = null;
+      rec.onerror = null;
+      rec.onend = null;
       try {
-        recognitionRef.current.stop();
-      } catch (e) {}
+        rec.stop();
+      } catch (e) {
+        try {
+          rec.abort();
+        } catch (e2) {}
+      }
+    }
+
+    // Cleanly finalize content without trailing whitespace
+    setContent((prev) => (finalTranscriptRef.current || prev || '').trim());
+  };
+
+  // Helper to initialize and start a SpeechRecognition instance cleanly
+  const initRecognition = () => {
+    if (!isRecordingRef.current) return;
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'gu-IN';
+
+      lastFinalIndexRef.current = -1;
+
+      recognition.onresult = (event) => {
+        if (!isRecordingRef.current) return;
+        let interimText = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const result = event.results[i];
+          if (!result || !result[0]) continue;
+
+          if (result.isFinal) {
+            // Guard: in a single session, never process the same index twice
+            if (i > lastFinalIndexRef.current) {
+              lastFinalIndexRef.current = i;
+              const chunk = result[0].transcript.trim();
+              if (chunk) {
+                finalTranscriptRef.current = appendSpeechTranscript(
+                  finalTranscriptRef.current,
+                  chunk
+                );
+              }
+            }
+          } else {
+            interimText += result[0].transcript;
+          }
+        }
+
+        // Live display: combine finalized accumulator with interim speech
+        const combined = appendSpeechTranscript(
+          finalTranscriptRef.current,
+          interimText
+        );
+        setContent(combined);
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+          alert('માઇક્રોફોનની પરવાનગી બંધ છે. કૃપા કરીને બ્રાઉઝર એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને મંજૂરી (Allow) આપો.');
+          stopVoiceRecording();
+        }
+      };
+
+      recognition.onend = () => {
+        if (recognitionRef.current === recognition) {
+          recognitionRef.current = null;
+        }
+
+        // If user hasn't pressed stop button, auto-restart cleanly
+        // with finalTranscriptRef holding all previously finalized sentences so NO PREVIOUS SENTENCES ARE EVER OVERWRITTEN!
+        if (isRecordingRef.current) {
+          restartTimerRef.current = setTimeout(() => {
+            if (isRecordingRef.current) {
+              initRecognition();
+            }
+          }, 100);
+        } else {
+          setIsRecording(false);
+        }
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.warn('Speech recognition start failed:', err);
+      if (isRecordingRef.current) {
+        restartTimerRef.current = setTimeout(() => {
+          if (isRecordingRef.current) {
+            initRecognition();
+          }
+        }, 300);
+      }
     }
   };
 
@@ -66,63 +176,19 @@ export default function AddGunaDrawer({
       return;
     }
 
-    baseContentRef.current = content;
+    if (isRecordingRef.current) {
+      stopVoiceRecording();
+      return;
+    }
+
+    // Capture initial textarea content so previous sentences/typing are never lost
+    const initialText = content.trim();
+    finalTranscriptRef.current = initialText;
+
     isRecordingRef.current = true;
     setIsRecording(true);
 
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'gu-IN';
-
-      recognition.onresult = (event) => {
-        let finalSpeech = '';
-        let interimSpeech = '';
-
-        for (let i = 0; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalSpeech += event.results[i][0].transcript + ' ';
-          } else {
-            interimSpeech += event.results[i][0].transcript;
-          }
-        }
-
-        const combined = (finalSpeech + interimSpeech).trim();
-        if (combined) {
-          const base = baseContentRef.current;
-          const separator = base && !base.endsWith(' ') ? ' ' : '';
-          setContent(base + separator + combined);
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.warn('Speech recognition error:', event.error);
-        if (event.error === 'not-allowed') {
-          alert('માઇક્રોફોનની પરવાનગી બંધ છે. કૃપા કરીને બ્રાઉઝર એડ્રેસ બારમાં માઇક આઇકોન પર ક્લિક કરીને મંજૂરી (Allow) આપો.');
-          stopVoiceRecording();
-        }
-      };
-
-      recognition.onend = () => {
-        // If user hasn't pressed stop button, auto-restart to prevent premature termination
-        if (isRecordingRef.current) {
-          try {
-            recognition.start();
-          } catch (e) {
-            stopVoiceRecording();
-          }
-        } else {
-          setIsRecording(false);
-        }
-      };
-
-      recognition.start();
-      recognitionRef.current = recognition;
-    } catch (err) {
-      console.error('Failed to start speech recognition:', err);
-      stopVoiceRecording();
-    }
+    initRecognition();
   };
 
   // Synchronize preselected recipient or initial filters when drawer opens
@@ -136,6 +202,7 @@ export default function AddGunaDrawer({
       setContent('');
       setRecipientSearch('');
       stopVoiceRecording();
+      finalTranscriptRef.current = '';
     }
   }, [isOpen, preselectedRecipientId, onlyUnwrittenInitial]);
 
@@ -155,7 +222,7 @@ export default function AddGunaDrawer({
 
   // Toggle Voice Recording
   const handleToggleVoice = () => {
-    if (isRecording) {
+    if (isRecordingRef.current) {
       stopVoiceRecording();
     } else {
       startVoiceRecording();
@@ -193,8 +260,9 @@ export default function AddGunaDrawer({
   // Append sentence starter to textarea
   const handleAddSentenceStarter = (starter) => {
     setContent((prev) => {
-      const cleanPrev = prev.trim();
+      const cleanPrev = (finalTranscriptRef.current || prev || '').trim();
       const newText = cleanPrev ? `${cleanPrev} ${starter}` : starter;
+      finalTranscriptRef.current = newText;
       return newText;
     });
     if (textareaRef.current) {
@@ -205,8 +273,10 @@ export default function AddGunaDrawer({
   // Append topic tag
   const handleAddTopicTag = (tag) => {
     setContent((prev) => {
-      const cleanPrev = prev.trim();
-      return cleanPrev ? `${cleanPrev} #${tag}` : `#${tag} `;
+      const cleanPrev = (finalTranscriptRef.current || prev || '').trim();
+      const newText = cleanPrev ? `${cleanPrev} #${tag}` : `#${tag} `;
+      finalTranscriptRef.current = newText.trim();
+      return newText;
     });
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -260,6 +330,7 @@ export default function AddGunaDrawer({
   // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    stopVoiceRecording();
     if (!recipientId || content.trim().length < 3 || isSubmitting) return;
 
     const selectedRecipient = eligibleKaryakars.find((k) => k.id === recipientId);
@@ -524,7 +595,7 @@ export default function AddGunaDrawer({
               value={content}
               onChange={(e) => {
                 setContent(e.target.value);
-                baseContentRef.current = e.target.value;
+                finalTranscriptRef.current = e.target.value;
               }}
               placeholder="તેમણે સેવામાં શું ઉત્તમ કર્યું? શાંતિથી, પ્રેમથી કે ખંતપૂર્વક કરેલી સેવા લખો..."
               className="w-full p-3.5 bg-stone-50/80 border border-stone-200 rounded-2xl text-sm font-gujarati text-stone-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 placeholder:text-stone-400 shadow-2xs"
