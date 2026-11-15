@@ -14,6 +14,8 @@ import {
   Trophy,
   Target,
   Pencil,
+  Crown,
+  ShieldCheck,
 } from 'lucide-react';
 import { getFirstGrapheme } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
@@ -28,6 +30,7 @@ export default function StickyHeader() {
     theme,
     logoutUser,
     openEditNameModal,
+    isAdminUser,
   } = useAppContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -104,6 +107,18 @@ export default function StickyHeader() {
         {currentUser && (
           <div className="relative shrink-0" ref={menuRef}>
             <div className="flex items-center gap-2">
+              {/* Admin Quick Entry Button if Admin */}
+              {isAdminUser && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-950 border border-amber-400/70 shadow-2xs hover:shadow-xs transition-all active:scale-95"
+                  title="એડમિન કંટ્રોલ પેનલ (સર્વ નિયંત્રણ)"
+                >
+                  <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                  <span className="font-gujarati font-extrabold hidden xs:inline">એડમિન</span>
+                </Link>
+              )}
+
               {/* Writer Milestone Pill Badge */}
               <div
                 className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs transition ${myWriterBadge.colorClass}`}
@@ -189,6 +204,32 @@ export default function StickyHeader() {
                 </div>
 
                 <div className="py-1 text-sm font-gujarati divide-y divide-stone-100">
+                  {/* Admin Control Center Link */}
+                  {isAdminUser ? (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-amber-100/70 via-orange-50/50 to-amber-50 hover:bg-amber-100 text-amber-950 transition text-left font-bold border-b border-amber-200/60"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Crown className="w-4 h-4 text-amber-600 fill-amber-500" />
+                        <span>👑 એડમિન કંટ્રોલ પેનલ</span>
+                      </div>
+                      <span className="text-[10px] bg-amber-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">
+                        ADMIN
+                      </span>
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-stone-600 hover:bg-amber-50 hover:text-amber-900 transition text-left font-medium text-xs border-b border-stone-100"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-amber-600" />
+                      <span>એડમિન લૉગિન પેનલ</span>
+                    </Link>
+                  )}
+
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);

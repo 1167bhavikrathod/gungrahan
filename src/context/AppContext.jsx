@@ -6,11 +6,18 @@ import { SEED_KARYAKARS_BAL, SEED_KARYAKARS_BALIKA } from '@/config/seedKaryakar
 import { getWriterBadge } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
+import {
+  isAdmin,
+  isSessionAdmin,
+  unlockAdminSession,
+  lockAdminSession,
+  BHAVIK_ADMIN_INFO,
+} from '@/config/adminConfig';
+
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const wing = process.env.NEXT_PUBLIC_APP_WING || 'bal';
-  const targetGunas = parseInt(process.env.NEXT_PUBLIC_TARGET_GUNAS || '200', 10);
   const theme = useMemo(() => getTheme(wing), [wing]);
 
   // Master State
@@ -19,6 +26,23 @@ export function AppProvider({ children }) {
   const [karyakars, setKaryakars] = useState([]);
   const [gunas, setGunas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Dynamic Target Gunas State
+  const [targetGunas, setTargetGunas] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`gunagrahan_target_gunas_${wing}`);
+        if (saved) {
+          const parsed = parseInt(saved, 10);
+          if (!isNaN(parsed) && parsed > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return parseInt(process.env.NEXT_PUBLIC_TARGET_GUNAS || '200', 10);
+  });
+
+  // Admin Session Unlocked State
+  const [adminSessionUnlocked, setAdminSessionUnlocked] = useState(false);
 
   // Global Drawers & Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -34,6 +58,7 @@ export function AppProvider({ children }) {
       if (stored) {
         setCurrentUser(JSON.parse(stored));
       }
+      setAdminSessionUnlocked(isSessionAdmin());
     } catch (e) {
       console.warn('Failed to parse stored user:', e);
     } finally {
@@ -91,9 +116,12 @@ export function AppProvider({ children }) {
           }
         } else {
           const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
+          const localCustomKaryakars = JSON.parse(
+            localStorage.getItem(`gunagrahan_karyakars_custom_${wing}`) || 'null'
+          );
           const localGunas = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
           if (isMounted) {
-            setKaryakars(seed);
+            setKaryakars(localCustomKaryakars || seed);
             setGunas(localGunas);
           }
         }
@@ -133,12 +161,35 @@ export function AppProvider({ children }) {
         )
         .on(
           'postgres_changes',
+          { event: 'DELETE', schema: 'public', table: 'gunas' },
+          (payload) => {
+            setGunas((prev) => prev.filter((g) => g.id !== payload.old.id));
+          }
+        )
+        .on(
+          'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'karyakars', filter: `wing=eq.${wing}` },
           (payload) => {
             setKaryakars((prev) => {
               if (prev.some((k) => k.id === payload.new.id)) return prev;
               return [...prev, payload.new];
             });
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'karyakars', filter: `wing=eq.${wing}` },
+          (payload) => {
+            setKaryakars((prev) =>
+              prev.map((k) => (k.id === payload.new.id ? { ...k, ...payload.new } : k))
+            );
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'DELETE', schema: 'public', table: 'karyakars' },
+          (payload) => {
+            setKaryakars((prev) => prev.filter((k) => k.id !== payload.old.id));
           }
         )
         .subscribe();
@@ -326,6 +377,247 @@ export function AppProvider({ children }) {
     );
   }, []);
 
+  // Target Count Updater
+  const updateTargetCount = useCallback((newTarget) => {
+    const count = parseInt(newTarget, 10);
+    if (isNaN(count) || count <= 0) return;
+    setTargetGunas(count);
+    try {
+      localStorage.setItem(`gunagrahan_target_gunas_${wing}`, String(count));
+    } catch (e) {}
+  }, [wing]);
+
+  // Admin Session Helpers
+  const unlockAdmin = useCallback(() => {
+    unlockAdminSession();
+    setAdminSessionUnlocked(true);
+  }, []);
+
+  const lockAdmin = useCallback(() => {
+    lockAdminSession();
+    setAdminSessionUnlocked(false);
+  }, []);
+
+  const loginAsBhavikAdmin = useCallback(() => {
+    loginUser(BHAVIK_ADMIN_INFO);
+    unlockAdminSession();
+    setAdminSessionUnlocked(true);
+  }, [loginUser]);
+
+  // Delete Guna Handler (Admin & Author)
+  const deleteGuna = useCallback(
+    async (gunaId) => {
+      if (!gunaId) return false;
+      setGunas((prev) => {
+        const updated = prev.filter((g) => g.id !== gunaId);
+        if (!isSupabaseConfigured) {
+          try {
+            localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
+          } catch (e) {}
+        }
+        return updated;
+      });
+
+      if (isSupabaseConfigured) {
+        try {
+          const { error } = await supabase.from('gunas').delete().eq('id', gunaId);
+          if (error) console.error('Failed to delete guna from Supabase:', error);
+        } catch (err) {
+          console.error('Error deleting guna:', err);
+        }
+      }
+      return true;
+    },
+    [wing]
+  );
+
+  // Admin Edit Guna Handler
+  const adminEditGuna = useCallback(
+    async (gunaId, updates) => {
+      if (!gunaId || !updates) return false;
+      setGunas((prev) => {
+        const updated = prev.map((g) => (g.id === gunaId ? { ...g, ...updates } : g));
+        if (!isSupabaseConfigured) {
+          try {
+            localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
+          } catch (e) {}
+        }
+        return updated;
+      });
+
+      if (isSupabaseConfigured) {
+        try {
+          const { error } = await supabase.from('gunas').update(updates).eq('id', gunaId);
+          if (error) console.error('Failed to update guna in Supabase:', error);
+        } catch (err) {
+          console.error('Error updating guna in Supabase:', err);
+        }
+      }
+      return true;
+    },
+    [wing]
+  );
+
+  // Admin Add Karyakar Handler
+  const adminAddKaryakar = useCallback(
+    async (newKaryakar) => {
+      const cleanName = (newKaryakar.name || '').trim();
+      const cleanNumber = (newKaryakar.karyakar_number || '').trim();
+      if (!cleanName) return { success: false, error: 'નામ દાખલ કરવું જરૂરી છે.' };
+
+      const karyakarObj = {
+        id:
+          newKaryakar.id ||
+          (typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `karyakar-${Date.now()}`),
+        name: cleanName,
+        karyakar_number: cleanNumber,
+        role: newKaryakar.role || 'સંચાલક',
+        sabha: newKaryakar.sabha || 'શિવશક્તિ',
+        wing: newKaryakar.wing || wing,
+        is_pre_registered: false,
+      };
+
+      setKaryakars((prev) => {
+        if (
+          prev.some(
+            (k) =>
+              k.id === karyakarObj.id ||
+              (cleanNumber && k.karyakar_number === cleanNumber)
+          )
+        ) {
+          return prev;
+        }
+        const updated = [...prev, karyakarObj];
+        try {
+          localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      if (isSupabaseConfigured) {
+        try {
+          const { error } = await supabase.from('karyakars').insert([karyakarObj]);
+          if (error) console.error('Failed to insert karyakar in Supabase:', error);
+        } catch (err) {
+          console.error('Error inserting karyakar in Supabase:', err);
+        }
+      }
+
+      return { success: true, karyakar: karyakarObj };
+    },
+    [wing]
+  );
+
+  // Admin Update Karyakar Handler
+  const adminUpdateKaryakar = useCallback(
+    async (karyakarId, updates) => {
+      if (!karyakarId || !updates) return false;
+
+      let oldName = '';
+      setKaryakars((prev) => {
+        const existing = prev.find((k) => k.id === karyakarId);
+        if (existing) oldName = existing.name;
+
+        const updated = prev.map((k) =>
+          k.id === karyakarId ? { ...k, ...updates } : k
+        );
+        try {
+          localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      // If current user is this karyakar, update currentUser as well
+      setCurrentUser((prevUser) => {
+        if (prevUser && prevUser.id === karyakarId) {
+          const updated = { ...prevUser, ...updates };
+          try {
+            localStorage.setItem('gunagrahan_user_v1', JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        }
+        return prevUser;
+      });
+
+      // If name changed, propagate to gunas
+      if (updates.name && oldName && updates.name !== oldName) {
+        const newName = updates.name.trim();
+        setGunas((prev) => {
+          const updated = prev.map((g) => {
+            let modified = false;
+            let item = { ...g };
+            if (g.author_id === karyakarId || g.author_name === oldName) {
+              item.author_name = newName;
+              modified = true;
+            }
+            if (g.recipient_id === karyakarId || g.recipient_name === oldName) {
+              item.recipient_name = newName;
+              modified = true;
+            }
+            return modified ? item : g;
+          });
+          if (!isSupabaseConfigured) {
+            try {
+              localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
+            } catch (e) {}
+          }
+          return updated;
+        });
+      }
+
+      if (isSupabaseConfigured) {
+        try {
+          const { error } = await supabase.from('karyakars').update(updates).eq('id', karyakarId);
+          if (error) console.error('Failed to update karyakar in Supabase:', error);
+
+          if (updates.name && oldName && updates.name !== oldName) {
+            await supabase.from('gunas').update({ author_name: updates.name }).eq('author_id', karyakarId);
+            await supabase.from('gunas').update({ recipient_name: updates.name }).eq('recipient_id', karyakarId);
+          }
+        } catch (err) {
+          console.error('Error updating karyakar in Supabase:', err);
+        }
+      }
+
+      return true;
+    },
+    [wing]
+  );
+
+  // Admin Delete Karyakar Handler
+  const adminDeleteKaryakar = useCallback(
+    async (karyakarId) => {
+      if (!karyakarId) return false;
+
+      setKaryakars((prev) => {
+        const updated = prev.filter((k) => k.id !== karyakarId);
+        try {
+          localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      if (isSupabaseConfigured) {
+        try {
+          const { error } = await supabase.from('karyakars').delete().eq('id', karyakarId);
+          if (error) console.error('Failed to delete karyakar from Supabase:', error);
+        } catch (err) {
+          console.error('Error deleting karyakar from Supabase:', err);
+        }
+      }
+
+      return true;
+    },
+    [wing]
+  );
+
+  // Computed isAdminUser
+  const isAdminUser = useMemo(() => {
+    return Boolean(isAdmin(currentUser) || adminSessionUnlocked);
+  }, [currentUser, adminSessionUnlocked]);
+
   // Derived Analytics
   const totalWrittenCount = gunas.length;
 
@@ -462,6 +754,18 @@ export function AppProvider({ children }) {
     handleGunaSubmitted,
     handleSaveEditedGuna,
     handleRajipoIncrement,
+    // Admin System Capabilities
+    adminSessionUnlocked,
+    isAdminUser,
+    unlockAdmin,
+    lockAdmin,
+    loginAsBhavikAdmin,
+    updateTargetCount,
+    deleteGuna,
+    adminEditGuna,
+    adminAddKaryakar,
+    adminUpdateKaryakar,
+    adminDeleteKaryakar,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
