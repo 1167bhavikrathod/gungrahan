@@ -31,6 +31,8 @@ export default function AddGunaDrawer({
   onlyUnwrittenInitial = false,
   wing = 'bal',
   theme,
+  activeProject,
+  projectStatus,
   onGunaSubmitted,
 }) {
   const [recipientId, setRecipientId] = useState(preselectedRecipientId || '');
@@ -331,6 +333,10 @@ export default function AddGunaDrawer({
   const handleSubmit = async (e) => {
     e.preventDefault();
     stopVoiceRecording();
+    if (projectStatus?.isSubmissionClosed) {
+      alert('આ પ્રોજેક્ટ માટે ગુણ લખવાનો સમય પૂર્ણ થઈ ગયો છે.');
+      return;
+    }
     if (!recipientId || content.trim().length < 3 || isSubmitting) return;
 
     const selectedRecipient = eligibleKaryakars.find((k) => k.id === recipientId);
@@ -341,7 +347,7 @@ export default function AddGunaDrawer({
 
     setIsSubmitting(true);
     try {
-      const newGunaData = {
+      const baseGunaData = {
         author_id: currentUser.id,
         author_name: currentUser.name,
         recipient_id: selectedRecipient.id,
@@ -351,14 +357,31 @@ export default function AddGunaDrawer({
         rajipo_count: 0,
       };
 
+      const isDbProject =
+        typeof activeProject?.id === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activeProject.id);
+      const newGunaData = isDbProject
+        ? { ...baseGunaData, project_id: activeProject.id }
+        : baseGunaData;
+
       let insertedGuna = null;
 
       if (isSupabaseConfigured) {
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('gunas')
           .insert(newGunaData)
           .select()
           .single();
+
+        if (error && isDbProject && /project_id/i.test(error.message || '')) {
+          const retryRes = await supabase
+            .from('gunas')
+            .insert(baseGunaData)
+            .select()
+            .single();
+          data = retryRes.data;
+          error = retryRes.error;
+        }
 
         if (error) {
           console.warn('Supabase insert guna failed, using local fallback:', error.message);

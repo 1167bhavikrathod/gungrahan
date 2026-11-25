@@ -33,13 +33,15 @@ import {
   ChevronRight,
   Sliders,
   Sparkles,
+  CalendarClock,
+  FolderKanban,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import {
   isAdmin,
   verifyAdminPin,
 } from '@/config/adminConfig';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime, toDatetimeLocalValue } from '@/lib/utils';
 import TilakChandlo from '@/components/TilakChandlo';
 
 export default function AdminPage() {
@@ -51,7 +53,14 @@ export default function AdminPage() {
     wing,
     theme,
     targetGunas,
+    projects,
+    activeProject,
+    projectStatus,
+    hasProjectsTable,
     updateTargetCount,
+    updateActiveProject,
+    createNewProject,
+    switchActiveProject,
     deleteGuna,
     adminEditGuna,
     adminAddKaryakar,
@@ -75,6 +84,21 @@ export default function AdminPage() {
   // Target Gunas Adjuster State
   const [newTargetInput, setNewTargetInput] = useState(String(targetGunas));
   const [isEditingTarget, setIsEditingTarget] = useState(false);
+
+  // Project & Deadline Management State
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [projectForm, setProjectForm] = useState({
+    name: activeProject?.name || 'રમતોત્સવ ૨૦૨૬',
+    subtitle: activeProject?.subtitle || '',
+    deadlineLocal: toDatetimeLocalValue(activeProject?.deadline_at),
+  });
+  const [newProjectForm, setNewProjectForm] = useState({
+    name: '',
+    subtitle: '',
+    target_gunas: '200',
+    deadlineLocal: '',
+  });
 
   // Gunas Tab Filters & State
   const [gunaSearchQuery, setGunaSearchQuery] = useState('');
@@ -132,6 +156,80 @@ export default function AdminPage() {
   useEffect(() => {
     setNewTargetInput(String(targetGunas));
   }, [targetGunas]);
+
+  // Sync projectForm when activeProject changes
+  useEffect(() => {
+    if (activeProject && !isEditingProject) {
+      setProjectForm({
+        name: activeProject.name || '',
+        subtitle: activeProject.subtitle || '',
+        deadlineLocal: toDatetimeLocalValue(activeProject.deadline_at),
+      });
+    }
+  }, [activeProject, isEditingProject]);
+
+  // Save Project & Deadline
+  const handleSaveProject = async (e) => {
+    e?.preventDefault();
+    const cleanName = projectForm.name.trim();
+    if (!cleanName) return;
+
+    const deadlineIso = projectForm.deadlineLocal
+      ? new Date(projectForm.deadlineLocal).toISOString()
+      : null;
+
+    await updateActiveProject({
+      name: cleanName,
+      subtitle: projectForm.subtitle.trim(),
+      deadline_at: deadlineIso,
+    });
+    setIsEditingProject(false);
+    showToast('📅 પ્રોજેક્ટ અને ડેડલાઇન અપડેટ થઈ ગઈ!');
+  };
+
+  // Toggle Manual Project Close/Reopen
+  const handleToggleProjectClosed = async () => {
+    const nextClosed = !activeProject?.is_closed;
+    await updateActiveProject({ is_closed: nextClosed });
+    showToast(
+      nextClosed
+        ? '🔒 પ્રોજેક્ટ બંધ કરવામાં આવ્યો (હવે ફક્ત વાંચી શકાય).'
+        : '🔓 પ્રોજેક્ટ ફરી ખુલ્લો મૂકવામાં આવ્યો!'
+    );
+  };
+
+  // Create & Switch to a New Project
+  const handleCreateNewProject = async (e) => {
+    e?.preventDefault();
+    const cleanName = newProjectForm.name.trim();
+    if (!cleanName) return;
+
+    const deadlineIso = newProjectForm.deadlineLocal
+      ? new Date(newProjectForm.deadlineLocal).toISOString()
+      : null;
+
+    const res = await createNewProject({
+      name: cleanName,
+      subtitle: newProjectForm.subtitle.trim(),
+      target_gunas: parseInt(newProjectForm.target_gunas, 10) || 200,
+      deadline_at: deadlineIso,
+    });
+
+    if (res?.success) {
+      setIsCreatingProject(false);
+      setNewProjectForm({ name: '', subtitle: '', target_gunas: '200', deadlineLocal: '' });
+      showToast(`🎉 નવો પ્રોજેક્ટ "${cleanName}" શરૂ થઈ ગયો!`);
+    }
+  };
+
+  // Set quick deadline preset (+1, +2, +3 days at 11:59 PM)
+  const applyDeadlinePreset = (daysToAdd, setter) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysToAdd);
+    d.setHours(23, 59, 0, 0);
+    const formatted = toDatetimeLocalValue(d);
+    setter((prev) => ({ ...prev, deadlineLocal: formatted }));
+  };
 
   // Handle PIN Submission
   const handleVerifyPin = (e) => {
@@ -745,13 +843,302 @@ export default function AdminPage() {
       {/* -------------------------------------------------------- */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fadeIn">
+          {/* Current Project & Auto-Closing Deadline Control Card */}
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-amber-900/15 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                  <FolderKanban className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-bold text-amber-800 uppercase font-gujarati">
+                      ચાલુ પ્રોજેક્ટ અને ડેડલાઇન
+                    </span>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold font-gujarati ${
+                        projectStatus?.isSubmissionClosed
+                          ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      }`}
+                    >
+                      {projectStatus?.isSubmissionClosed ? '🔒 બંધ (ફક્ત વાંચી શકાય)' : `🟢 ${projectStatus?.remainingText || 'ખુલ્લું છે'}`}
+                    </span>
+                  </div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-stone-900 font-gujarati mt-0.5">
+                    {activeProject?.name || 'રમતોત્સવ ૨૦૨૬'}
+                    {activeProject?.subtitle ? (
+                      <span className="text-sm font-semibold text-stone-500"> • {activeProject.subtitle}</span>
+                    ) : null}
+                  </h2>
+                  <p className="text-xs text-stone-500 font-gujarati flex items-center gap-1.5 mt-0.5">
+                    <CalendarClock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>
+                      {projectStatus?.formattedDeadline
+                        ? `અંતિમ તારીખ: ${projectStatus.formattedDeadline} (પછી આપમેળે બંધ થશે)`
+                        : 'અંતિમ તારીખ સેટ કરેલ નથી (સતત ખુલ્લું)'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    setIsEditingProject((v) => !v);
+                    setIsCreatingProject(false);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold font-gujarati border border-amber-300 transition flex items-center gap-1.5"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>પ્રોજેક્ટ / ડેડલાઇન બદલો</span>
+                </button>
+
+                <button
+                  onClick={handleToggleProjectClosed}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold font-gujarati border transition flex items-center gap-1.5 ${
+                    activeProject?.is_closed
+                      ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                      : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-200'
+                  }`}
+                >
+                  {activeProject?.is_closed ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                  <span>{activeProject?.is_closed ? 'ફરી ચાલુ કરો' : 'હમણાં બંધ કરો'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsCreatingProject((v) => !v);
+                    setIsEditingProject(false);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold font-gujarati transition flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5 text-amber-300" />
+                  <span>નવો પ્રોજેક્ટ</span>
+                </button>
+              </div>
+            </div>
+
+            {!hasProjectsTable && (
+              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-gujarati">
+                નોંધ: Supabase માં `projects` ટેબલ બનાવ્યા પછી બધા યુઝર્સને ક્લાઉડ પર આ સેટિંગ લાઇવ દેખાશે (હમણાં બ્રાઉઝરમાં સેવ છે).
+              </div>
+            )}
+
+            {/* Project Switcher (when multiple projects exist) */}
+            {projects.length > 1 && (
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-stone-100 text-xs font-gujarati">
+                <span className="font-bold text-stone-500">પ્રોજેક્ટ બદલો:</span>
+                <select
+                  value={activeProject?.id || ''}
+                  onChange={(e) => switchActiveProject(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-stone-800 font-bold"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.subtitle ? `(${p.subtitle})` : ''} {p.is_active ? '• ચાલુ' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Inline Edit Current Project & Deadline Form */}
+            {isEditingProject && (
+              <form onSubmit={handleSaveProject} className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                      પ્રોજેક્ટનું નામ *
+                    </label>
+                    <input
+                      type="text"
+                      value={projectForm.name}
+                      onChange={(e) => setProjectForm((p) => ({ ...p, name: e.target.value }))}
+                      placeholder="દા.ત. ફનવર્સ"
+                      className="w-full px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-gujarati"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                      ઉત્સવ / વિગત (વૈકલ્પિક)
+                    </label>
+                    <input
+                      type="text"
+                      value={projectForm.subtitle}
+                      onChange={(e) => setProjectForm((p) => ({ ...p, subtitle: e.target.value }))}
+                      placeholder="દા.ત. દિવાળી ઉત્સવ ૨૦૨૬"
+                      className="w-full px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-gujarati"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                    ગુણ લખવાની અંતિમ તારીખ અને સમય (Deadline)
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="datetime-local"
+                      value={projectForm.deadlineLocal}
+                      onChange={(e) => setProjectForm((p) => ({ ...p, deadlineLocal: e.target.value }))}
+                      className="px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-mono flex-1"
+                    />
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => applyDeadlinePreset(1, setProjectForm)}
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-amber-300 text-xs font-bold font-gujarati text-amber-900 hover:bg-amber-100"
+                      >
+                        +૧ દિવસ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyDeadlinePreset(2, setProjectForm)}
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-amber-300 text-xs font-bold font-gujarati text-amber-900 hover:bg-amber-100"
+                      >
+                        +૨ દિવસ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyDeadlinePreset(3, setProjectForm)}
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-amber-300 text-xs font-bold font-gujarati text-amber-900 hover:bg-amber-100"
+                      >
+                        +૩ દિવસ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProjectForm((p) => ({ ...p, deadlineLocal: '' }))}
+                        className="px-2.5 py-1.5 rounded-lg bg-stone-100 border border-stone-300 text-xs font-bold font-gujarati text-stone-700 hover:bg-stone-200"
+                      >
+                        હટાવો
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingProject(false)}
+                    className="px-3 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold font-gujarati"
+                  >
+                    રદ કરો
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold font-gujarati shadow-xs"
+                  >
+                    સેવ કરો
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Inline Create New Project Form */}
+            {isCreatingProject && (
+              <form onSubmit={handleCreateNewProject} className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                <h3 className="text-xs font-extrabold text-stone-900 font-gujarati">
+                  ✨ નવો પ્રોજેક્ટ શરૂ કરો (જૂના પ્રોજેક્ટના ગુણ સુરક્ષિત રહેશે)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                      નવા પ્રોજેક્ટનું નામ *
+                    </label>
+                    <input
+                      type="text"
+                      value={newProjectForm.name}
+                      onChange={(e) => setNewProjectForm((p) => ({ ...p, name: e.target.value }))}
+                      placeholder="દા.ત. ફનવર્સ"
+                      className="w-full px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-gujarati"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                      ઉત્સવ / વિગત
+                    </label>
+                    <input
+                      type="text"
+                      value={newProjectForm.subtitle}
+                      onChange={(e) => setNewProjectForm((p) => ({ ...p, subtitle: e.target.value }))}
+                      placeholder="દા.ત. દિવાળી ઉત્સવ ૨૦૨૬"
+                      className="w-full px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-gujarati"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                      ગુણ લક્ષ્યાંક
+                    </label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="5000"
+                      value={newProjectForm.target_gunas}
+                      onChange={(e) => setNewProjectForm((p) => ({ ...p, target_gunas: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1">
+                    ડેડલાઇન (વૈકલ્પિક)
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="datetime-local"
+                      value={newProjectForm.deadlineLocal}
+                      onChange={(e) => setNewProjectForm((p) => ({ ...p, deadlineLocal: e.target.value }))}
+                      className="px-3 py-2 rounded-xl border border-stone-300 bg-white text-sm font-mono flex-1"
+                    />
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => applyDeadlinePreset(2, setNewProjectForm)}
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-stone-300 text-xs font-bold font-gujarati text-stone-800 hover:bg-stone-100"
+                      >
+                        +૨ દિવસ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyDeadlinePreset(3, setNewProjectForm)}
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-stone-300 text-xs font-bold font-gujarati text-stone-800 hover:bg-stone-100"
+                      >
+                        +૩ દિવસ
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreatingProject(false)}
+                    className="px-3 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold font-gujarati"
+                  >
+                    રદ કરો
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold font-gujarati"
+                  >
+                    નવો પ્રોજેક્ટ શરૂ કરો
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
           {/* Top Target Progress & Adjuster Banner */}
           <div className="bg-gradient-to-br from-amber-50 via-white to-orange-50/40 rounded-3xl p-5 border border-amber-900/15 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="text-xs font-bold text-amber-800 font-gujarati uppercase tracking-wider flex items-center gap-1.5">
                   <Target className="w-4 h-4 text-amber-600" />
-                  <span>ગુણગ્રહણ સંકલ્પ લક્ષ્યાંક (Ramotsav 2026)</span>
+                  <span>ગુણગ્રહણ સંકલ્પ લક્ષ્યાંક ({activeProject?.name || 'રમતોત્સવ ૨૦૨૬'})</span>
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-2xl sm:text-3xl font-black text-stone-900">
@@ -1334,16 +1721,6 @@ export default function AdminPage() {
                 </p>
                 <p className="text-[11px] text-stone-400">રીયલટાઈમ પ્રસારણ સક્રિય</p>
               </div>
-            </div>
-
-            <div className="pt-2 flex flex-wrap gap-2">
-              <button
-                onClick={handleInstantBhavikLogin}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-gujarati font-bold text-xs shadow-xs active:scale-95 transition flex items-center gap-1.5"
-              >
-                <Crown className="w-3.5 h-3.5" />
-                <span>ભાવિકભાઈ પ્રોફાઇલ પર સ્વિચ કરો</span>
-              </button>
             </div>
           </div>
         </div>

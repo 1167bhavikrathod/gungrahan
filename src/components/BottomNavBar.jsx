@@ -3,12 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, MessageSquareQuote, Plus, Trophy, Target } from 'lucide-react';
+import { Home, MessageSquareQuote, Plus, Trophy, Target, Lock } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
-  const { theme, openAddModal } = useAppContext();
+  const { theme, openAddModal, projectStatus } = useAppContext();
+  const isClosed = Boolean(projectStatus?.isSubmissionClosed);
 
   // Hide on report page and admin control page
   if (pathname === '/report' || pathname === '/admin') {
@@ -53,13 +54,19 @@ export default function BottomNavBar() {
               <div key={idx} className="relative -top-5 flex flex-col items-center">
                 <button
                   onClick={item.action}
-                  className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-700/25 transition-transform active:scale-90 hover:scale-105 border-2 border-white ${theme.primaryGradient} focus:outline-none`}
-                  aria-label="Add new guna"
+                  disabled={isClosed}
+                  className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white focus:outline-none ${
+                    isClosed
+                      ? 'bg-stone-400 shadow-stone-400/25 cursor-not-allowed'
+                      : `shadow-blue-700/25 transition-transform active:scale-90 hover:scale-105 ${theme.primaryGradient}`
+                  }`}
+                  aria-label={isClosed ? 'Submissions closed' : 'Add new guna'}
+                  title={isClosed ? 'સમય પૂર્ણ (ફક્ત વાંચી શકાય)' : 'નવો ગુણ ઉમેરો'}
                 >
-                  <Plus className="w-6 h-6 stroke-[2.8]" />
+                  {isClosed ? <Lock className="w-5 h-5" /> : <Plus className="w-6 h-6 stroke-[2.8]" />}
                 </button>
-                <span className="text-[10px] font-bold font-gujarati text-amber-950 mt-0.5">
-                  લખો
+                <span className={`text-[10px] font-bold font-gujarati mt-0.5 ${isClosed ? 'text-stone-400' : 'text-amber-950'}`}>
+                  {isClosed ? 'બંધ' : 'લખો'}
                 </span>
               </div>
             );

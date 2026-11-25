@@ -160,6 +160,68 @@ export function getNextBadgeMotivation(count = 0, rank = null) {
   return `🌟 ${rankStr}'${badge.nextTitle}' બનવા બીજા ${remaining} ગુણ લખો!`;
 }
 
+export function isUuid(value) {
+  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+export function formatDeadlineDate(dateInput) {
+  if (!dateInput) return '';
+  const d = new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return '';
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = months[d.getMonth()];
+  let hr = d.getHours();
+  const ampm = hr >= 12 ? 'PM' : 'AM';
+  hr = hr % 12 || 12;
+  const min = d.getMinutes().toString().padStart(2, '0');
+  return `${day} ${month}, ${hr}:${min} ${ampm}`;
+}
+
+export function toDatetimeLocalValue(dateInput) {
+  if (!dateInput) return '';
+  const d = new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function getProjectStatus(project, nowMs = Date.now()) {
+  const isManuallyClosed = Boolean(project?.is_closed);
+  const deadlineMs = project?.deadline_at ? new Date(project.deadline_at).getTime() : null;
+  const hasValidDeadline = Boolean(deadlineMs && !Number.isNaN(deadlineMs));
+  const isExpired = Boolean(hasValidDeadline && nowMs >= deadlineMs);
+  const isSubmissionClosed = isManuallyClosed || isExpired;
+
+  let remainingText = 'સમયમર્યાદા ખુલ્લી';
+  if (isManuallyClosed) {
+    remainingText = 'પ્રોજેક્ટ બંધ છે';
+  } else if (isExpired) {
+    remainingText = 'અંતિમ સમય પૂર્ણ';
+  } else if (hasValidDeadline) {
+    const diffMin = Math.max(1, Math.floor((deadlineMs - nowMs) / 60000));
+    const days = Math.floor(diffMin / (60 * 24));
+    const hours = Math.floor((diffMin % (60 * 24)) / 60);
+    const mins = diffMin % 60;
+    if (days > 0) {
+      remainingText = `${days} દિવસ ${hours > 0 ? `${hours} કલાક ` : ''}બાકી`;
+    } else if (hours > 0) {
+      remainingText = `${hours} કલાક ${mins > 0 ? `${mins} મિનિટ ` : ''}બાકી`;
+    } else {
+      remainingText = `${mins} મિનિટ બાકી`;
+    }
+  }
+
+  return {
+    isManuallyClosed,
+    isExpired,
+    isSubmissionClosed,
+    hasValidDeadline,
+    formattedDeadline: hasValidDeadline ? formatDeadlineDate(deadlineMs) : '',
+    remainingText,
+  };
+}
+
 /**
  * Helper to strip punctuation and normalize word for duplicate comparison
  */

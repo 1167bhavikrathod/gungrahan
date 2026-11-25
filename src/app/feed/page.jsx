@@ -10,19 +10,20 @@ export default function FeedPage() {
     karyakars,
     currentUser,
     theme,
+    projectStatus,
     handleRajipoIncrement,
     setEditingGuna,
   } = useAppContext();
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
       <PublicGunaFeed
         gunas={gunas}
         karyakars={karyakars}
         currentUserId={currentUser?.id}
         theme={theme}
         onRajipoIncrement={handleRajipoIncrement}
-        onEdit={(guna) => setEditingGuna(guna)}
+        onEdit={projectStatus?.isSubmissionClosed ? null : (guna) => setEditingGuna(guna)}
       />
     </div>
   );

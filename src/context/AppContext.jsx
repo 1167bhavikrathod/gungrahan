@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { getTheme } from '@/config/theme';
 import { SEED_KARYAKARS_BAL, SEED_KARYAKARS_BALIKA } from '@/config/seedKaryakars';
-import { getWriterBadge } from '@/lib/utils';
+import { getWriterBadge, getProjectStatus, isUuid } from '@/lib/utils';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
 import {
@@ -16,15 +16,33 @@ import {
 
 const AppContext = createContext(null);
 
+function createDefaultProject(wing, defaultTarget = 200) {
+  return {
+    id: `default-project-${wing}`,
+    name: 'રમતોત્સવ ૨૦૨૬',
+    subtitle: 'ગુણગ્રહણ મહોત્સવ',
+    wing,
+    target_gunas: defaultTarget,
+    deadline_at: null,
+    is_active: true,
+    is_closed: false,
+    created_at: new Date().toISOString(),
+  };
+}
+
 export function AppProvider({ children }) {
   const wing = process.env.NEXT_PUBLIC_APP_WING || 'bal';
   const theme = useMemo(() => getTheme(wing), [wing]);
+  const defaultTarget = parseInt(process.env.NEXT_PUBLIC_TARGET_GUNAS || '200', 10);
 
   // Master State
   const [currentUser, setCurrentUser] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [karyakars, setKaryakars] = useState([]);
   const [gunas, setGunas] = useState([]);
+  const [projects, setProjects] = useState(() => [createDefaultProject(wing, defaultTarget)]);
+  const [hasProjectsTable, setHasProjectsTable] = useState(false);
+  const [nowTick, setNowTick] = useState(() => Date.now());
   const [isLoading, setIsLoading] = useState(true);
 
   // Dynamic Target Gunas State
@@ -38,7 +56,7 @@ export function AppProvider({ children }) {
         }
       } catch (e) {}
     }
-    return parseInt(process.env.NEXT_PUBLIC_TARGET_GUNAS || '200', 10);
+    return defaultTarget;
   });
 
   // Admin Session Unlocked State
@@ -75,6 +93,14 @@ export function AppProvider({ children }) {
     }
   }, []);
 
+  // Periodic tick (every 30s) so open tabs auto-lock when deadline passes
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNowTick(Date.now());
+    }, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
   // 2. Fetch Data from Supabase / Seed Fallback
   useEffect(() => {
     let isMounted = true;
@@ -83,11 +109,13 @@ export function AppProvider({ children }) {
       setIsLoading(true);
       try {
         if (isSupabaseConfigured) {
-          const { data: kData, error: kError } = await supabase
-            .from('karyakars')
-            .select('*')
-            .eq('wing', wing);
+          const [kRes, gRes, pRes] = await Promise.all([
+            supabase.from('karyakars').select('*').eq('wing', wing),
+            supabase.from('gunas').select('*').eq('wing', wing).order('created_at', { ascending: false }),
+            supabase.from('projects').select('*').eq('wing', wing).order('created_at', { ascending: false }),
+          ]);
 
+          const { data: kData, error: kError } = kRes;
           if (!kError && kData && kData.length > 0) {
             const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
             const merged = [...kData];
@@ -114,14 +142,30 @@ export function AppProvider({ children }) {
             if (isMounted) setKaryakars(seed);
           }
 
-          const { data: gData, error: gError } = await supabase
-            .from('gunas')
-            .select('*')
-            .eq('wing', wing)
-            .order('created_at', { ascending: false });
-
+          const { data: gData, error: gError } = gRes;
           if (!gError && gData) {
             if (isMounted) setGunas(gData);
+          }
+
+          const { data: pData, error: pError } = pRes;
+          if (!pError && Array.isArray(pData)) {
+            if (isMounted) {
+              setHasProjectsTable(true);
+              if (pData.length > 0) {
+                setProjects(pData);
+              } else {
+                const storedProj = JSON.parse(localStorage.getItem(`gunagrahan_projects_${wing}`) || 'null');
+                if (storedProj && storedProj.length > 0) setProjects(storedProj);
+              }
+            }
+          } else {
+            if (isMounted) {
+              setHasProjectsTable(false);
+              try {
+                const storedProj = JSON.parse(localStorage.getItem(`gunagrahan_projects_${wing}`) || 'null');
+                if (storedProj && storedProj.length > 0) setProjects(storedProj);
+              } catch (e) {}
+            }
           }
         } else {
           const seed = wing === 'balika' ? SEED_KARYAKARS_BALIKA : SEED_KARYAKARS_BAL;
@@ -129,9 +173,11 @@ export function AppProvider({ children }) {
             localStorage.getItem(`gunagrahan_karyakars_custom_${wing}`) || 'null'
           );
           const localGunas = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
+          const localProjects = JSON.parse(localStorage.getItem(`gunagrahan_projects_${wing}`) || 'null');
           if (isMounted) {
             setKaryakars(localCustomKaryakars || seed);
             setGunas(localGunas);
+            if (localProjects && localProjects.length > 0) setProjects(localProjects);
           }
         }
       } catch (err) {
@@ -199,6 +245,27 @@ export function AppProvider({ children }) {
           { event: 'DELETE', schema: 'public', table: 'karyakars' },
           (payload) => {
             setKaryakars((prev) => prev.filter((k) => k.id !== payload.old.id));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'projects', filter: `wing=eq.${wing}` },
+          (payload) => {
+            setHasProjectsTable(true);
+            setProjects((prev) => {
+              const filtered = prev.filter((p) => isUuid(p.id) && p.id !== payload.new.id);
+              return [payload.new, ...filtered];
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'projects', filter: `wing=eq.${wing}` },
+          (payload) => {
+            setHasProjectsTable(true);
+            setProjects((prev) =>
+              prev.map((p) => (p.id === payload.new.id ? { ...p, ...payload.new } : p))
+            );
           }
         )
         .subscribe();
@@ -396,15 +463,206 @@ export function AppProvider({ children }) {
     );
   }, []);
 
+  // Active Project & Deadline Helpers
+  const activeProject = useMemo(() => {
+    return projects.find((p) => p.is_active) || projects[0] || createDefaultProject(wing, targetGunas);
+  }, [projects, wing, targetGunas]);
+
+  const effectiveTargetGunas = useMemo(() => {
+    const t = parseInt(activeProject?.target_gunas, 10);
+    return !isNaN(t) && t > 0 ? t : targetGunas;
+  }, [activeProject, targetGunas]);
+
+  const projectStatus = useMemo(() => {
+    return getProjectStatus(activeProject, nowTick);
+  }, [activeProject, nowTick]);
+
+  const persistProjectsLocal = useCallback(
+    (nextProjects) => {
+      try {
+        localStorage.setItem(`gunagrahan_projects_${wing}`, JSON.stringify(nextProjects));
+      } catch (e) {}
+    },
+    [wing]
+  );
+
+  // Update Active Project (Name, Subtitle, Target, Deadline, Closed state)
+  const updateActiveProject = useCallback(
+    async (updates) => {
+      if (!updates || !activeProject) return false;
+
+      if (updates.target_gunas) {
+        const parsedTarget = parseInt(updates.target_gunas, 10);
+        if (!isNaN(parsedTarget) && parsedTarget > 0) {
+          setTargetGunas(parsedTarget);
+          try {
+            localStorage.setItem(`gunagrahan_target_gunas_${wing}`, String(parsedTarget));
+          } catch (e) {}
+        }
+      }
+
+      const mergedProject = { ...activeProject, ...updates };
+      setProjects((prev) => {
+        const exists = prev.some((p) => p.id === activeProject.id);
+        const next = exists
+          ? prev.map((p) => (p.id === activeProject.id ? mergedProject : p))
+          : [mergedProject, ...prev];
+        persistProjectsLocal(next);
+        return next;
+      });
+
+      if (isSupabaseConfigured && hasProjectsTable) {
+        try {
+          if (isUuid(activeProject.id)) {
+            const { error } = await supabase
+              .from('projects')
+              .update(updates)
+              .eq('id', activeProject.id);
+            if (error) console.error('Failed to update project in Supabase:', error);
+          } else {
+            const insertPayload = {
+              name: mergedProject.name || 'રમતોત્સવ ૨૦૨૬',
+              subtitle: mergedProject.subtitle || '',
+              wing,
+              target_gunas: Number(mergedProject.target_gunas) || 200,
+              deadline_at: mergedProject.deadline_at || null,
+              is_active: true,
+              is_closed: Boolean(mergedProject.is_closed),
+            };
+            const { data, error } = await supabase
+              .from('projects')
+              .insert(insertPayload)
+              .select()
+              .single();
+            if (!error && data) {
+              setProjects((prev) => {
+                const next = prev.map((p) => (p.id === activeProject.id ? data : p));
+                persistProjectsLocal(next);
+                return next;
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Error updating project in Supabase:', err);
+        }
+      }
+
+      return true;
+    },
+    [activeProject, wing, hasProjectsTable, persistProjectsLocal]
+  );
+
+  // Create & Switch to a New Project (keeps previous project's gunas archived)
+  const createNewProject = useCallback(
+    async ({ name, subtitle = '', target_gunas = 200, deadline_at = null }) => {
+      const cleanName = (name || '').trim();
+      if (!cleanName) return { success: false, error: 'પ્રોજેક્ટનું નામ લખવું જરૂરી છે.' };
+
+      const parsedTarget = Math.max(10, parseInt(target_gunas, 10) || 200);
+      const localNewProject = {
+        id:
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `project-${Date.now()}`,
+        name: cleanName,
+        subtitle: (subtitle || '').trim(),
+        wing,
+        target_gunas: parsedTarget,
+        deadline_at: deadline_at || null,
+        is_active: true,
+        is_closed: false,
+        created_at: new Date().toISOString(),
+      };
+
+      setTargetGunas(parsedTarget);
+      try {
+        localStorage.setItem(`gunagrahan_target_gunas_${wing}`, String(parsedTarget));
+      } catch (e) {}
+
+      if (isSupabaseConfigured && hasProjectsTable) {
+        try {
+          await supabase.from('projects').update({ is_active: false }).eq('wing', wing);
+          const { data, error } = await supabase
+            .from('projects')
+            .insert({
+              name: localNewProject.name,
+              subtitle: localNewProject.subtitle,
+              wing,
+              target_gunas: parsedTarget,
+              deadline_at: localNewProject.deadline_at,
+              is_active: true,
+              is_closed: false,
+            })
+            .select()
+            .single();
+
+          if (!error && data) {
+            setProjects((prev) => {
+              const deactivated = prev
+                .filter((p) => isUuid(p.id))
+                .map((p) => ({ ...p, is_active: false }));
+              const next = [data, ...deactivated];
+              persistProjectsLocal(next);
+              return next;
+            });
+            return { success: true, project: data };
+          }
+        } catch (err) {
+          console.error('Error creating project in Supabase:', err);
+        }
+      }
+
+      setProjects((prev) => {
+        const deactivated = prev.map((p) => ({ ...p, is_active: false }));
+        const next = [localNewProject, ...deactivated];
+        persistProjectsLocal(next);
+        return next;
+      });
+      return { success: true, project: localNewProject };
+    },
+    [wing, hasProjectsTable, persistProjectsLocal]
+  );
+
+  // Switch Active Project
+  const switchActiveProject = useCallback(
+    async (projectId) => {
+      if (!projectId) return false;
+      const target = projects.find((p) => p.id === projectId);
+      if (!target) return false;
+
+      if (target.target_gunas) {
+        setTargetGunas(Number(target.target_gunas));
+      }
+
+      setProjects((prev) => {
+        const next = prev.map((p) => ({ ...p, is_active: p.id === projectId }));
+        persistProjectsLocal(next);
+        return next;
+      });
+
+      if (isSupabaseConfigured && hasProjectsTable && isUuid(projectId)) {
+        try {
+          await supabase.from('projects').update({ is_active: false }).eq('wing', wing);
+          await supabase.from('projects').update({ is_active: true }).eq('id', projectId);
+        } catch (err) {
+          console.error('Error switching active project:', err);
+        }
+      }
+
+      return true;
+    },
+    [projects, wing, hasProjectsTable, persistProjectsLocal]
+  );
+
   // Target Count Updater
-  const updateTargetCount = useCallback((newTarget) => {
-    const count = parseInt(newTarget, 10);
-    if (isNaN(count) || count <= 0) return;
-    setTargetGunas(count);
-    try {
-      localStorage.setItem(`gunagrahan_target_gunas_${wing}`, String(count));
-    } catch (e) {}
-  }, [wing]);
+  const updateTargetCount = useCallback(
+    (newTarget) => {
+      const count = parseInt(newTarget, 10);
+      if (isNaN(count) || count <= 0) return;
+      updateActiveProject({ target_gunas: count });
+    },
+    [updateActiveProject]
+  );
 
   // Admin Session Helpers
   const unlockAdmin = useCallback(() => {
@@ -637,13 +895,34 @@ export function AppProvider({ children }) {
     return Boolean(isAdmin(currentUser));
   }, [currentUser]);
 
+  // Scope Gunas to Active Project (first/legacy project also includes unlinked rows)
+  const earliestProjectId = useMemo(() => {
+    const dbProjects = projects.filter((p) => isUuid(p.id));
+    if (dbProjects.length === 0) return null;
+    const sorted = [...dbProjects].sort(
+      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+    return sorted[0]?.id || null;
+  }, [projects]);
+
+  const scopedGunas = useMemo(() => {
+    if (!activeProject || !isUuid(activeProject.id)) {
+      return gunas;
+    }
+    const dbProjectsCount = projects.filter((p) => isUuid(p.id)).length;
+    if (dbProjectsCount <= 1 || activeProject.id === earliestProjectId) {
+      return gunas.filter((g) => !g.project_id || g.project_id === activeProject.id);
+    }
+    return gunas.filter((g) => g.project_id === activeProject.id);
+  }, [gunas, projects, activeProject, earliestProjectId]);
+
   // Derived Analytics
-  const totalWrittenCount = gunas.length;
+  const totalWrittenCount = scopedGunas.length;
 
   const myWrittenCount = useMemo(() => {
     if (!currentUser) return 0;
-    return gunas.filter((g) => g.author_id === currentUser.id).length;
-  }, [gunas, currentUser]);
+    return scopedGunas.filter((g) => g.author_id === currentUser.id).length;
+  }, [scopedGunas, currentUser]);
 
   const myWriterBadge = useMemo(() => {
     return getWriterBadge(myWrittenCount);
@@ -654,7 +933,7 @@ export function AppProvider({ children }) {
     const counts = {};
     const names = {};
 
-    gunas.forEach((g) => {
+    scopedGunas.forEach((g) => {
       const aId = g.author_id;
       counts[aId] = (counts[aId] || 0) + 1;
       names[aId] = g.author_name || names[aId] || 'અજ્ઞાત લેખક';
@@ -668,7 +947,7 @@ export function AppProvider({ children }) {
     }));
 
     return entries.sort((a, b) => b.count - a.count);
-  }, [gunas]);
+  }, [scopedGunas]);
 
   // Personal Coverage Stats (20/20 Checklist)
   const myCoverageStats = useMemo(() => {
@@ -677,7 +956,7 @@ export function AppProvider({ children }) {
     }
 
     const otherKaryakars = sortedKaryakars.filter((k) => k.id !== currentUser.id);
-    const myGunas = gunas.filter((g) => g.author_id === currentUser.id);
+    const myGunas = scopedGunas.filter((g) => g.author_id === currentUser.id);
 
     // Map recipient_id -> array of gunas written by me
     const writtenMap = {};
@@ -696,7 +975,7 @@ export function AppProvider({ children }) {
       unwrittenKaryakars,
       writtenMap,
     };
-  }, [sortedKaryakars, gunas, currentUser]);
+  }, [sortedKaryakars, scopedGunas, currentUser]);
 
   // Smart Nudge Suggestions
   const smartNudgeKaryakars = useMemo(() => {
@@ -704,11 +983,11 @@ export function AppProvider({ children }) {
 
     const otherKaryakars = sortedKaryakars.filter((k) => k.id !== currentUser.id);
     const writtenByMeSet = new Set(
-      gunas.filter((g) => g.author_id === currentUser.id).map((g) => g.recipient_id)
+      scopedGunas.filter((g) => g.author_id === currentUser.id).map((g) => g.recipient_id)
     );
 
     const receivedCounts = {};
-    gunas.forEach((g) => {
+    scopedGunas.forEach((g) => {
       receivedCounts[g.recipient_id] = (receivedCounts[g.recipient_id] || 0) + 1;
     });
 
@@ -725,20 +1004,28 @@ export function AppProvider({ children }) {
     });
 
     return candidates.slice(0, 3);
-  }, [sortedKaryakars, gunas, currentUser]);
+  }, [sortedKaryakars, scopedGunas, currentUser]);
 
-  // Modal Openers
-  const openAddModal = useCallback((recipientId = null) => {
-    setPreselectedRecipientId(recipientId);
-    setOnlyUnwrittenFilter(false);
-    setIsAddModalOpen(true);
-  }, []);
+  // Modal Openers (locked automatically when project deadline has passed)
+  const openAddModal = useCallback(
+    (recipientId = null) => {
+      if (projectStatus.isSubmissionClosed) return;
+      setPreselectedRecipientId(recipientId);
+      setOnlyUnwrittenFilter(false);
+      setIsAddModalOpen(true);
+    },
+    [projectStatus.isSubmissionClosed]
+  );
 
-  const openCoverageAddModal = useCallback((recipientId = null) => {
-    setPreselectedRecipientId(recipientId);
-    setOnlyUnwrittenFilter(true);
-    setIsAddModalOpen(true);
-  }, []);
+  const openCoverageAddModal = useCallback(
+    (recipientId = null) => {
+      if (projectStatus.isSubmissionClosed) return;
+      setPreselectedRecipientId(recipientId);
+      setOnlyUnwrittenFilter(true);
+      setIsAddModalOpen(true);
+    },
+    [projectStatus.isSubmissionClosed]
+  );
 
   const openEditNameModal = useCallback(() => {
     setIsEditNameModalOpen(true);
@@ -748,13 +1035,18 @@ export function AppProvider({ children }) {
     () => ({
       wing,
       theme,
-      targetGunas,
+      targetGunas: effectiveTargetGunas,
+      projects,
+      activeProject,
+      projectStatus,
+      hasProjectsTable,
       currentUser,
       isHydrated,
       loginUser,
       logoutUser,
       karyakars: sortedKaryakars,
-      gunas,
+      gunas: scopedGunas,
+      allGunas: gunas,
       isLoading,
       totalWrittenCount,
       myWrittenCount,
@@ -785,6 +1077,9 @@ export function AppProvider({ children }) {
       lockAdmin,
       loginAsBhavikAdmin,
       updateTargetCount,
+      updateActiveProject,
+      createNewProject,
+      switchActiveProject,
       deleteGuna,
       adminEditGuna,
       adminAddKaryakar,
@@ -794,12 +1089,17 @@ export function AppProvider({ children }) {
     [
       wing,
       theme,
-      targetGunas,
+      effectiveTargetGunas,
+      projects,
+      activeProject,
+      projectStatus,
+      hasProjectsTable,
       currentUser,
       isHydrated,
       loginUser,
       logoutUser,
       sortedKaryakars,
+      scopedGunas,
       gunas,
       isLoading,
       totalWrittenCount,
@@ -826,6 +1126,9 @@ export function AppProvider({ children }) {
       lockAdmin,
       loginAsBhavikAdmin,
       updateTargetCount,
+      updateActiveProject,
+      createNewProject,
+      switchActiveProject,
       deleteGuna,
       adminEditGuna,
       adminAddKaryakar,

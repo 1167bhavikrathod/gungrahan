@@ -17,9 +17,23 @@ create table if not exists public.karyakars (
 -- Ensure column exists if table was already created
 alter table public.karyakars add column if not exists karyakar_number text;
 
+-- 1B. PROJECTS TABLE (Active Campaign & Auto-Closing Deadline)
+create table if not exists public.projects (
+  id uuid primary key default uuid_generate_v4(),
+  name text not null,
+  subtitle text not null default '',
+  wing text not null default 'bal' check (wing in ('bal', 'balika')),
+  target_gunas integer not null default 200,
+  deadline_at timestamptz,
+  is_active boolean not null default true,
+  is_closed boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 -- 2. GUNAS TABLE (Virtue Entries)
 create table if not exists public.gunas (
   id uuid primary key default uuid_generate_v4(),
+  project_id uuid references public.projects(id) on delete set null,
   author_id uuid not null references public.karyakars(id) on delete cascade,
   author_name text not null,
   recipient_id uuid not null references public.karyakars(id) on delete cascade,
@@ -30,9 +44,13 @@ create table if not exists public.gunas (
   created_at timestamptz not null default now()
 );
 
+alter table public.gunas add column if not exists project_id uuid references public.projects(id) on delete set null;
+
 -- 3. INDEXES FOR <50ms QUERIES
+create index if not exists idx_projects_wing_active on public.projects(wing, is_active, created_at desc);
 create index if not exists idx_karyakars_wing on public.karyakars(wing);
 create index if not exists idx_gunas_wing_created on public.gunas(wing, created_at desc);
+create index if not exists idx_gunas_project_created on public.gunas(project_id, created_at desc);
 create index if not exists idx_gunas_author on public.gunas(author_id);
 create index if not exists idx_gunas_recipient on public.gunas(recipient_id);
 
@@ -47,6 +65,7 @@ as 'update public.gunas set rajipo_count = rajipo_count + 1 where id = row_id;';
 -- 5. ROW LEVEL SECURITY (Open Passwordless Access for Internal Karyakar App)
 alter table public.karyakars enable row level security;
 alter table public.gunas enable row level security;
+alter table public.projects enable row level security;
 
 -- Drop existing policies if re-running
 drop policy if exists "Allow public read karyakars" on public.karyakars;
@@ -54,12 +73,18 @@ drop policy if exists "Allow public insert karyakars" on public.karyakars;
 drop policy if exists "Allow public read gunas" on public.gunas;
 drop policy if exists "Allow public insert gunas" on public.gunas;
 drop policy if exists "Allow public update rajipo_count" on public.gunas;
+drop policy if exists "Allow public read projects" on public.projects;
+drop policy if exists "Allow public insert projects" on public.projects;
+drop policy if exists "Allow public update projects" on public.projects;
 
 create policy "Allow public read karyakars" on public.karyakars for select using (true);
 create policy "Allow public insert karyakars" on public.karyakars for insert with check (true);
 create policy "Allow public read gunas" on public.gunas for select using (true);
 create policy "Allow public insert gunas" on public.gunas for insert with check (true);
 create policy "Allow public update rajipo_count" on public.gunas for update using (true);
+create policy "Allow public read projects" on public.projects for select using (true);
+create policy "Allow public insert projects" on public.projects for insert with check (true);
+create policy "Allow public update projects" on public.projects for update using (true);
 
 -- 6. ENABLE REALTIME WEBSOCKETS (Safe idempotent block)
 do $pub$
@@ -71,6 +96,11 @@ begin
   end;
   begin
     alter publication supabase_realtime add table public.karyakars;
+  exception when duplicate_object then
+    null;
+  end;
+  begin
+    alter publication supabase_realtime add table public.projects;
   exception when duplicate_object then
     null;
   end;

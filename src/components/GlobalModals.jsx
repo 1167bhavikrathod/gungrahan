@@ -28,6 +28,8 @@ export default function GlobalModals() {
     isEditNameModalOpen,
     setIsEditNameModalOpen,
     updateUserName,
+    activeProject,
+    projectStatus,
   } = useAppContext();
 
   return (
@@ -54,6 +56,8 @@ export default function GlobalModals() {
         onlyUnwrittenInitial={onlyUnwrittenFilter}
         wing={wing}
         theme={theme}
+        activeProject={activeProject}
+        projectStatus={projectStatus}
         onGunaSubmitted={handleGunaSubmitted}
       />
 

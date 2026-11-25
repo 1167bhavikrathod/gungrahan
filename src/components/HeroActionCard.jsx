@@ -1,16 +1,19 @@
 'use client';
 
 import React from 'react';
-import { PlusCircle, Target, CheckCircle2, Trees, Sprout, Flower2 } from 'lucide-react';
+import { PlusCircle, CheckCircle2, CalendarClock, Lock, FolderKanban } from 'lucide-react';
 
 export default function HeroActionCard({
   totalWrittenCount = 0,
   targetCount = 200,
   myCoverageStats,
+  activeProject,
+  projectStatus,
   theme,
   onOpenAddModal,
   onOpenCoverageFilter,
 }) {
+  const isClosed = Boolean(projectStatus?.isSubmissionClosed);
   const coveredCount = myCoverageStats?.coveredCount || 0;
   const totalOthers = myCoverageStats?.totalOthers || 1;
   const unwrittenCount = myCoverageStats?.unwrittenKaryakars?.length || 0;
@@ -60,18 +63,77 @@ export default function HeroActionCard({
 
   return (
     <div className={`p-4 sm:p-6 rounded-3xl bg-white border ${theme.cardBorder} shadow-sm space-y-4 sm:space-y-5 relative overflow-hidden`}>
-      {/* 1. Primary CTA Button - Royal Mandir Finish */}
-      <button
-        onClick={() => onOpenAddModal()}
-        className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base transition-transform shadow-md ${theme.primaryGradient}`}
-      >
-        <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
-          <PlusCircle className="w-5 h-5 text-amber-200" />
+      {/* 0. Current Project & Deadline Strip */}
+      {activeProject && (
+        <div
+          className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-2 ${
+            isClosed
+              ? 'bg-rose-50/80 border-rose-200 text-rose-950'
+              : 'bg-amber-50/70 border-amber-200/80 text-amber-950'
+          }`}
+        >
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div
+              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                isClosed ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              <FolderKanban className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wide opacity-75 font-gujarati">
+                ચાલુ પ્રોજેક્ટ
+              </p>
+              <p className="text-xs sm:text-sm font-extrabold font-gujarati truncate">
+                {activeProject.name}
+                {activeProject.subtitle ? (
+                  <span className="font-semibold opacity-80"> • {activeProject.subtitle}</span>
+                ) : null}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end shrink-0 text-right">
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full font-gujarati whitespace-nowrap ${
+                isClosed
+                  ? 'bg-rose-600 text-white'
+                  : 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+              }`}
+            >
+              {isClosed ? <Lock className="w-3 h-3" /> : <CalendarClock className="w-3 h-3" />}
+              <span>{projectStatus?.remainingText || 'ખુલ્લું છે'}</span>
+            </span>
+            {projectStatus?.formattedDeadline && (
+              <span className="text-[10px] font-semibold opacity-75 mt-0.5 font-gujarati whitespace-nowrap">
+                અંતિમ સમય: {projectStatus.formattedDeadline}
+              </span>
+            )}
+          </div>
         </div>
-        <span className="font-gujarati tracking-wide text-white text-base sm:text-lg">
-          નવો ગુણ ઉમેરો
-        </span>
-      </button>
+      )}
+
+      {/* 1. Primary CTA Button - Royal Mandir Finish (Locked when Deadline Passes) */}
+      {isClosed ? (
+        <div className="w-full p-3.5 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center gap-2.5 text-stone-700 text-center">
+          <Lock className="w-4 h-4 text-rose-600 shrink-0" />
+          <span className="font-gujarati font-bold text-xs sm:text-sm">
+            આ પ્રોજેક્ટ માટે ગુણ લખવાનો સમય પૂર્ણ થઈ ગયો છે (ફક્ત વાંચી શકાય)
+          </span>
+        </div>
+      ) : (
+        <button
+          onClick={() => onOpenAddModal()}
+          className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base transition-transform shadow-md ${theme.primaryGradient}`}
+        >
+          <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+            <PlusCircle className="w-5 h-5 text-amber-200" />
+          </div>
+          <span className="font-gujarati tracking-wide text-white text-base sm:text-lg">
+            નવો ગુણ ઉમેરો
+          </span>
+        </button>
+      )}
 
       {/* 2. Living "સંપ વૃક્ષ" (Tree of Unity) Visual Progress Track */}
       <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 border border-amber-900/10 space-y-3">
@@ -150,16 +212,20 @@ export default function HeroActionCard({
 
       {/* 3. Personal "Coverage Ring" Card - Handcrafted Seal Style */}
       <div
-        onClick={() => onOpenCoverageFilter()}
+        onClick={() => {
+          if (!isClosed) onOpenCoverageFilter();
+        }}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (!isClosed && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
             onOpenCoverageFilter();
           }
         }}
-        className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-50/40 via-white to-orange-50/20 border border-amber-900/10 flex items-center justify-between gap-2 cursor-pointer hover:border-amber-300 active:scale-[0.99] transition-colors group"
+        className={`p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-50/40 via-white to-orange-50/20 border border-amber-900/10 flex items-center justify-between gap-2 transition-colors group ${
+          isClosed ? 'cursor-default opacity-90' : 'cursor-pointer hover:border-amber-300 active:scale-[0.99]'
+        }`}
       >
         {/* Left: SVG Gauge + Spiritual Copy */}
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
@@ -203,7 +269,11 @@ export default function HeroActionCard({
 
         {/* Right: Action Pill */}
         <div className="shrink-0">
-          {unwrittenCount > 0 ? (
+          {isClosed ? (
+            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full font-gujarati whitespace-nowrap">
+              <Lock className="w-3 h-3 shrink-0" /> સમય પૂર્ણ
+            </span>
+          ) : unwrittenCount > 0 ? (
             <span className="inline-flex items-center text-[11px] sm:text-xs font-bold text-amber-800 bg-amber-100/80 hover:bg-amber-200/80 px-2.5 py-1 rounded-full transition-colors font-gujarati whitespace-nowrap">
               બાકી {unwrittenCount} →
             </span>

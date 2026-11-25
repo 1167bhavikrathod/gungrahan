@@ -20,6 +20,8 @@ export default function HomePage() {
     currentUser,
     theme,
     targetGunas,
+    activeProject,
+    projectStatus,
     totalWrittenCount,
     myWrittenCount,
     myWriterBadge,
@@ -83,6 +85,8 @@ export default function HomePage() {
         totalWrittenCount={totalWrittenCount}
         targetCount={targetGunas}
         myCoverageStats={myCoverageStats}
+        activeProject={activeProject}
+        projectStatus={projectStatus}
         theme={theme}
         onOpenAddModal={() => openAddModal(null)}
         onOpenCoverageFilter={openCoverageAddModal}
@@ -222,7 +226,7 @@ export default function HomePage() {
                 isAboutMe={guna.recipient_id === currentUser?.id}
                 theme={theme}
                 onRajipoIncrement={handleRajipoIncrement}
-                onEdit={(g) => setEditingGuna(g)}
+                onEdit={projectStatus?.isSubmissionClosed ? null : (g) => setEditingGuna(g)}
               />
             ))}
           </div>
