@@ -70,11 +70,11 @@ export default function StickyHeader() {
               priority
             />
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+          <div className="flex flex-col items-start sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 min-w-0">
             <span className="font-extrabold text-xs sm:text-base md:text-lg tracking-tight text-stone-900 truncate leading-tight">
               ગુણગ્રહણ એપ
             </span>
-            <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold shadow-2xs shrink-0 whitespace-nowrap ${theme.primarySoftBg}`}>
+            <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold shadow-2xs shrink-0 whitespace-nowrap leading-none ${theme.primarySoftBg}`}>
               {theme.wingLabelGujarati}
             </span>
           </div>

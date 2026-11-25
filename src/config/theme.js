@@ -4,7 +4,7 @@ export const getTheme = (wing = 'bal') => {
   return {
     isBal,
     wing,
-    wingLabelGujarati: isBal ? 'બાળ મંડળ' : 'બાલિકા મંડળ',
+    wingLabelGujarati: isBal ? 'ક્ષેત્ર ૨૧ બાળ મંડળ' : 'ક્ષેત્ર ૨૧ બાલિકા મંડળ',
     // Warm Parchment & Ivory Backgrounds
     appBg: isBal ? 'bg-[#FAF7F2] text-[#1C1917]' : 'bg-[#FFF9F9] text-[#1C1917]',
     headerBg: isBal
