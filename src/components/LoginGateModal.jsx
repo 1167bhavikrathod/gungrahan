@@ -101,6 +101,11 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
       return;
     }
 
+    if (karyakars.some((k) => String(k.karyakar_number || '').trim() === cleanNumber)) {
+      setErrorMessage('આ કાર્યકર નંબર પહેલેથી નોંધાયેલ છે. કૃપા કરીને લિસ્ટમાંથી તમારું નામ પસંદ કરો.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 

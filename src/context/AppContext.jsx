@@ -56,9 +56,18 @@ export function AppProvider({ children }) {
     try {
       const stored = localStorage.getItem('gunagrahan_user_v1');
       if (stored) {
-        setCurrentUser(JSON.parse(stored));
+        const parsedUser = JSON.parse(stored);
+        setCurrentUser(parsedUser);
+        if (isAdmin(parsedUser) && isSessionAdmin()) {
+          setAdminSessionUnlocked(true);
+        } else {
+          lockAdminSession();
+          setAdminSessionUnlocked(false);
+        }
+      } else {
+        lockAdminSession();
+        setAdminSessionUnlocked(false);
       }
-      setAdminSessionUnlocked(isSessionAdmin());
     } catch (e) {
       console.warn('Failed to parse stored user:', e);
     } finally {
@@ -217,6 +226,14 @@ export function AppProvider({ children }) {
       localStorage.setItem('gunagrahan_user_v1', JSON.stringify(user));
     } catch (e) {}
 
+    if (isAdmin(user)) {
+      unlockAdminSession();
+      setAdminSessionUnlocked(true);
+    } else {
+      lockAdminSession();
+      setAdminSessionUnlocked(false);
+    }
+
     setKaryakars((prev) => {
       if (prev.some((k) => k.id === user.id || k.name === user.name)) return prev;
       return [...prev, user];
@@ -226,6 +243,8 @@ export function AppProvider({ children }) {
   // Logout handler
   const logoutUser = useCallback(() => {
     setCurrentUser(null);
+    lockAdminSession();
+    setAdminSessionUnlocked(false);
     try {
       localStorage.removeItem('gunagrahan_user_v1');
     } catch (e) {}
@@ -613,10 +632,10 @@ export function AppProvider({ children }) {
     [wing]
   );
 
-  // Computed isAdminUser
+  // Computed isAdminUser (strictly visible only when logged in as Bhavik)
   const isAdminUser = useMemo(() => {
-    return Boolean(isAdmin(currentUser) || adminSessionUnlocked);
-  }, [currentUser, adminSessionUnlocked]);
+    return Boolean(isAdmin(currentUser));
+  }, [currentUser]);
 
   // Derived Analytics
   const totalWrittenCount = gunas.length;

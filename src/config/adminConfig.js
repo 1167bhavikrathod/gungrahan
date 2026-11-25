@@ -21,38 +21,15 @@ export const MASTER_ADMIN_PINS = [
 
 /**
  * Checks whether a given user object has Administrator rights.
- * Bhavik ("ભાવિક યોગેશભાઈ રાઠોડ", 13317) is designated as Super Admin.
+ * Only Bhavik ("ભાવિક યોગેશભાઈ રાઠોડ", ID 13317) is designated as Super Admin.
  */
 export function isAdmin(user) {
   if (!user) return false;
 
-  // 1. Check explicit admin flag or role
-  if (user.is_admin === true || user.role === 'admin' || user.role === 'સુપર એડમિન') {
-    return true;
-  }
-
-  // 2. Check official Karyakar Number for Bhavik
-  const userNumber = String(user.karyakar_number || '').trim();
-  if (userNumber === '13317') {
-    return true;
-  }
-
-  // 3. Check official ID
-  if (user.id === BHAVIK_ADMIN_INFO.id) {
-    return true;
-  }
-
-  // 4. Check name match for Bhavik (Gujarati & English variants)
-  const userName = String(user.name || '').toLowerCase().trim();
-  if (
-    userName.includes('ભાવિક') ||
-    userName.includes('bhavik') ||
-    userName.includes('13317')
-  ) {
-    return true;
-  }
-
-  return false;
+  return (
+    user.id === BHAVIK_ADMIN_INFO.id &&
+    String(user.karyakar_number || '').trim() === BHAVIK_ADMIN_INFO.karyakar_number
+  );
 }
 
 /**

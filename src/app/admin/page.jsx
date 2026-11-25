@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Crown,
-  ShieldCheck,
   ShieldAlert,
   KeyRound,
   Users,
@@ -29,7 +28,6 @@ import {
   Unlock,
   Eye,
   EyeOff,
-  UserCheck,
   CheckCircle2,
   ArrowLeft,
   ChevronRight,
@@ -38,8 +36,6 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import {
-  BHAVIK_ADMIN_INFO,
-  MASTER_ADMIN_PINS,
   isAdmin,
   verifyAdminPin,
 } from '@/config/adminConfig';
@@ -64,7 +60,6 @@ export default function AdminPage() {
     adminSessionUnlocked,
     unlockAdmin,
     lockAdmin,
-    loginAsBhavikAdmin,
     openAddModal,
   } = useAppContext();
 
@@ -129,8 +124,9 @@ export default function AdminPage() {
     }, 3500);
   };
 
-  // Determine if Admin is Authenticated
-  const isSuperAdmin = Boolean(isAdmin(currentUser) || adminSessionUnlocked);
+  // Determine if Admin is Authenticated (must be logged in as Bhavik)
+  const isBhavikAccount = isAdmin(currentUser);
+  const isSuperAdmin = Boolean(isBhavikAccount && adminSessionUnlocked);
 
   // Sync newTargetInput when targetGunas changes
   useEffect(() => {
@@ -150,12 +146,6 @@ export default function AdminPage() {
     } else {
       setPinError('ખોટો એડમિન પિન! કૃપા કરીને સાચો પિન દાખલ કરો.');
     }
-  };
-
-  // One-Click Login as Bhavik
-  const handleInstantBhavikLogin = () => {
-    loginAsBhavikAdmin();
-    showToast('👑 ભાવિકભાઈ તરીકે સફળતાપૂર્વક લોગિન થયા!');
   };
 
   // Save Target Count
@@ -519,15 +509,49 @@ export default function AdminPage() {
   };
 
   // -------------------------------------------------------------
-  // VIEW A: ADMIN PIN GATE (If not authenticated as Admin)
+  // VIEW A: RESTRICTED ACCESS / ADMIN PIN GATE
   // -------------------------------------------------------------
+  if (!isBhavikAccount) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-amber-900/15 overflow-hidden">
+          <div className="bg-gradient-to-br from-stone-800 via-stone-900 to-amber-950 p-6 text-white text-center">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-white/10 flex items-center justify-center mb-3 border border-white/20">
+              <ShieldAlert className="w-8 h-8 text-amber-300" />
+            </div>
+            <h1 className="text-xl font-black tracking-tight font-gujarati">
+              અધિકૃત પ્રવેશ નથી
+            </h1>
+            <p className="text-xs text-amber-100/80 mt-1 font-gujarati">
+              એડમિન કંટ્રોલ પેનલ માત્ર મુખ્ય સંચાલક (ભાવિકભાઈ) માટે જ ઉપલબ્ધ છે.
+            </p>
+          </div>
+
+          <div className="p-6 text-center space-y-4">
+            <p className="text-xs sm:text-sm text-stone-600 font-gujarati leading-relaxed">
+              જો આપ ભાવિકભાઈ છો, તો કૃપા કરીને તમારા સત્તાવાર કાર્યકર આઈડી અને પાસવર્ડથી લોગિન કરો.
+            </p>
+
+            <Link
+              href="/"
+              className="w-full py-2.5 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-gujarati font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>હોમ પેજ પર પાછા જાઓ</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isSuperAdmin) {
     return (
       <div className="min-h-[85vh] flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden">
           {/* Header Card */}
           <div className="bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 p-6 text-white text-center relative">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-3 border border-white/20 shadow-md">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-white/15 flex items-center justify-center mb-3 border border-white/20 shadow-md">
               <Crown className="w-8 h-8 text-amber-200 fill-amber-300" />
             </div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight font-gujarati">
@@ -538,37 +562,12 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="p-6 space-y-6">
-            {/* Quick Option 1: Direct Bhavik Login */}
-            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-center space-y-2.5">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-200/60 text-amber-900 text-xs font-bold font-gujarati">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
-                <span>મુખ્ય સુપર એડમિન: ભાવિકભાઈ</span>
-              </div>
-              <p className="text-xs text-stone-600 font-gujarati">
-                જો આપ <strong>ભાવિકભાઈ (૧૩૩૧૭)</strong> છો, તો નીચે આપેલ બટનથી સીધા સક્રિય કરી શકો છો:
-              </p>
-              <button
-                onClick={handleInstantBhavikLogin}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-gujarati font-bold text-sm shadow-md shadow-amber-600/20 active:scale-95 transition flex items-center justify-center gap-2"
-              >
-                <Crown className="w-4 h-4 text-amber-200 fill-amber-300" />
-                <span>હું ભાવિક છું (Direct Admin Access)</span>
-              </button>
-            </div>
-
-            <div className="relative flex items-center justify-center">
-              <div className="border-t border-stone-200 w-full" />
-              <span className="bg-white px-3 text-xs font-bold text-stone-400 font-gujarati uppercase">
-                અથવા એડમિન પિન દાખલ કરો
-              </span>
-            </div>
-
-            {/* Option 2: Admin PIN Entry Form */}
+          <div className="p-6 space-y-5">
+            {/* Admin PIN Entry Form */}
             <form onSubmit={handleVerifyPin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 font-gujarati mb-1.5">
-                  એડમિન પિન (Default: 13317)
+                  એડમિન પિન દાખલ કરો
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
@@ -581,7 +580,7 @@ export default function AdminPage() {
                       setPinInput(e.target.value);
                       if (pinError) setPinError('');
                     }}
-                    placeholder="દા.ત. 13317"
+                    placeholder="એડમિન પિન દાખલ કરો..."
                     className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-amber-900/20 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 text-stone-900 font-mono tracking-widest text-center text-base"
                     autoFocus
                   />
@@ -683,17 +682,6 @@ export default function AdminPage() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {currentUser && currentUser.karyakar_number !== '13317' && (
-            <button
-              onClick={handleInstantBhavikLogin}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold font-gujarati transition active:scale-95 shadow-xs flex items-center gap-1.5"
-              title="ભાવિક તરીકે સ્વિચ કરો"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>ભાવિક તરીકે સ્વિચ કરો</span>
-            </button>
-          )}
-
           <Link
             href="/"
             className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold font-gujarati transition active:scale-95 border border-white/10 flex items-center gap-1.5"

@@ -15,7 +15,6 @@ import {
   Target,
   Pencil,
   Crown,
-  ShieldCheck,
 } from 'lucide-react';
 import { getFirstGrapheme } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
@@ -203,8 +202,8 @@ export default function StickyHeader() {
                 </div>
 
                 <div className="py-1 text-sm font-gujarati divide-y divide-stone-100">
-                  {/* Admin Control Center Link */}
-                  {isAdminUser ? (
+                  {/* Admin Control Center Link (Visible only to Bhavik) */}
+                  {isAdminUser && (
                     <Link
                       href="/admin"
                       onClick={() => setIsMenuOpen(false)}
@@ -217,15 +216,6 @@ export default function StickyHeader() {
                       <span className="text-[10px] bg-amber-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">
                         ADMIN
                       </span>
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/admin"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-stone-600 hover:bg-amber-50 hover:text-amber-900 transition text-left font-medium text-xs border-b border-stone-100"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-amber-600" />
-                      <span>એડમિન લૉગિન પેનલ</span>
                     </Link>
                   )}
 
