@@ -8,8 +8,8 @@ export const getTheme = (wing = 'bal') => {
     // Warm Parchment & Ivory Backgrounds
     appBg: isBal ? 'bg-[#FAF7F2] text-[#1C1917]' : 'bg-[#FFF9F9] text-[#1C1917]',
     headerBg: isBal
-      ? 'bg-[#FFFDF9]/92 backdrop-blur-md border-b border-amber-900/10 shadow-xs'
-      : 'bg-[#FFFDF9]/92 backdrop-blur-md border-b border-rose-200/60 shadow-xs',
+      ? 'bg-[#FFFDF9] border-b border-amber-900/10 shadow-xs'
+      : 'bg-[#FFFDF9] border-b border-rose-200/60 shadow-xs',
     // Royal Mandir Gradient Buttons
     primaryGradient: isBal
       ? 'bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-800 hover:to-indigo-800 text-white shadow-lg shadow-blue-900/20 active:scale-[0.98] border border-blue-400/20'

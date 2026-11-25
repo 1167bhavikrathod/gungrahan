@@ -99,7 +99,7 @@ export function getWriterBadge(count = 0) {
   if (num >= 25) {
     return {
       icon: '💎',
-      title: 'ગુણના ભિખારી',
+      title: 'ગુણ સાધક',
       level: 3,
       targetNext: 50,
       nextTitle: 'સંપ શિલ્પી',
@@ -112,7 +112,7 @@ export function getWriterBadge(count = 0) {
       title: 'ગુણ ગ્રાહક',
       level: 2,
       targetNext: 25,
-      nextTitle: 'ગુણના ભિખારી',
+      nextTitle: 'ગુણ સાધક',
       colorClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
     };
   }

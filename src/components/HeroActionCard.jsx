@@ -59,16 +59,13 @@ export default function HeroActionCard({
   const ringStrokeOffset = ringCircumference - (coveragePercent / 100) * ringCircumference;
 
   return (
-    <div className={`p-4 sm:p-6 rounded-3xl bg-white border ${theme.cardBorder} ${theme.cardShadow} space-y-5 relative overflow-hidden`}>
-      {/* Subtle auspicious background glow */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-300/10 via-orange-300/5 to-transparent rounded-full blur-2xl pointer-events-none" />
-
+    <div className={`p-4 sm:p-6 rounded-3xl bg-white border ${theme.cardBorder} shadow-sm space-y-4 sm:space-y-5 relative overflow-hidden`}>
       {/* 1. Primary CTA Button - Royal Mandir Finish */}
       <button
         onClick={() => onOpenAddModal()}
-        className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-md ${theme.primaryGradient}`}
+        className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base transition-transform shadow-md ${theme.primaryGradient}`}
       >
-        <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
           <PlusCircle className="w-5 h-5 text-amber-200" />
         </div>
         <span className="font-gujarati tracking-wide text-white text-base sm:text-lg">
@@ -77,12 +74,12 @@ export default function HeroActionCard({
       </button>
 
       {/* 2. Living "સંપ વૃક્ષ" (Tree of Unity) Visual Progress Track */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 border border-amber-900/10 space-y-3">
-        <div className="flex items-center justify-between font-gujarati">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🌳</span>
-            <div>
-              <h3 className="font-bold text-sm sm:text-base text-stone-900 flex items-center gap-1.5">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 border border-amber-900/10 space-y-3">
+        <div className="flex items-start sm:items-center justify-between gap-2 font-gujarati">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="text-lg shrink-0">🌳</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-sm sm:text-base text-stone-900">
                 સંપ વૃક્ષ • સમૂહ લક્ષ્યાંક
               </h3>
               <p className="text-[11px] text-amber-800/80 -mt-0.5">
@@ -90,7 +87,7 @@ export default function HeroActionCard({
               </p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right shrink-0 whitespace-nowrap">
             <span className="text-xl sm:text-2xl font-extrabold text-amber-900">
               {totalWrittenCount}
             </span>
@@ -103,7 +100,7 @@ export default function HeroActionCard({
           {/* Background Rail */}
           <div className="relative w-full h-3 bg-stone-200/80 rounded-full overflow-hidden shadow-inner">
             <div
-              className={`h-full transition-all duration-700 ease-out rounded-full ${theme.progressBarFill} shadow-sm`}
+              className={`h-full transition-[width] duration-500 ease-out rounded-full ${theme.progressBarFill}`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -115,14 +112,14 @@ export default function HeroActionCard({
               return (
                 <div
                   key={stage.target}
-                  className={`flex flex-col items-center transition-all ${
+                  className={`flex flex-col items-center ${
                     isReached ? 'scale-105' : 'opacity-60'
                   }`}
                 >
                   <div
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm shadow-xs transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${
                       isReached
-                        ? 'bg-amber-100 border-2 border-amber-500 shadow-amber-500/20'
+                        ? 'bg-amber-100 border-2 border-amber-500'
                         : 'bg-stone-100 border border-stone-200'
                     }`}
                   >
@@ -144,7 +141,7 @@ export default function HeroActionCard({
         {/* Celebration Banner */}
         {celebrationBanner && (
           <div
-            className={`p-2.5 rounded-xl border text-xs text-center font-bold font-gujarati transition-all ${celebrationBanner.classes}`}
+            className={`p-2.5 rounded-xl border text-xs text-center font-bold font-gujarati ${celebrationBanner.classes}`}
           >
             {celebrationBanner.text}
           </div>
@@ -162,10 +159,10 @@ export default function HeroActionCard({
             onOpenCoverageFilter();
           }
         }}
-        className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50/40 via-white to-orange-50/20 border border-amber-900/10 flex items-center justify-between cursor-pointer hover:border-amber-300 hover:shadow-xs active:scale-[0.99] transition-all group"
+        className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-50/40 via-white to-orange-50/20 border border-amber-900/10 flex items-center justify-between gap-2 cursor-pointer hover:border-amber-300 active:scale-[0.99] transition-colors group"
       >
         {/* Left: SVG Gauge + Spiritual Copy */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
           <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
             <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
               <circle
@@ -186,7 +183,7 @@ export default function HeroActionCard({
                 strokeDasharray={ringCircumference}
                 strokeDashoffset={ringStrokeOffset}
                 strokeLinecap="round"
-                className="transition-all duration-700 ease-out"
+                className="transition-[stroke-dashoffset] duration-500 ease-out"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center text-[10px] font-extrabold text-stone-700">
@@ -194,25 +191,25 @@ export default function HeroActionCard({
             </div>
           </div>
 
-          <div>
-            <p className="text-xs sm:text-sm font-bold text-stone-900 font-gujarati">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm font-bold text-stone-900 font-gujarati leading-snug">
               🎯 તમે {totalOthers} માંથી {coveredCount} કાર્યકરોના ગુણ લખ્યા
             </p>
-            <p className="text-[11px] text-stone-500 font-gujarati">
+            <p className="text-[11px] text-stone-500 font-gujarati leading-snug">
               કોઈ કાર્યકર બાકી ન રહે તેવો પવિત્ર સંકલ્પ
             </p>
           </div>
         </div>
 
         {/* Right: Action Pill */}
-        <div className="shrink-0 pl-2">
+        <div className="shrink-0">
           {unwrittenCount > 0 ? (
-            <span className="inline-flex items-center text-xs font-bold text-amber-800 bg-amber-100/80 hover:bg-amber-200/80 px-2.5 py-1 rounded-full transition font-gujarati group-hover:translate-x-0.5">
+            <span className="inline-flex items-center text-[11px] sm:text-xs font-bold text-amber-800 bg-amber-100/80 hover:bg-amber-200/80 px-2.5 py-1 rounded-full transition-colors font-gujarati whitespace-nowrap">
               બાકી {unwrittenCount} →
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded-full font-gujarati">
-              <CheckCircle2 className="w-3.5 h-3.5" /> બધા કવર!
+            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded-full font-gujarati whitespace-nowrap">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> બધા કવર!
             </span>
           )}
         </div>

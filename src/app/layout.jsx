@@ -21,7 +21,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata = {
   title: 'ગુણગ્રહણ એપ | Gunagrahan WebApp',
-  description: 'રમતોત્સવ ૨૦૨૬ — ગુણગ્રહણ મહોત્સવ: ગુણના ભિખારી બનીએ',
+  description: 'રમતોત્સવ ૨૦૨૬ — ગુણગ્રહણ મહોત્સવ',
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',

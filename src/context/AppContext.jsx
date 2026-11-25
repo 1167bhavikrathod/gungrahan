@@ -709,64 +709,111 @@ export function AppProvider({ children }) {
   }, [sortedKaryakars, gunas, currentUser]);
 
   // Modal Openers
-  const openAddModal = (recipientId = null) => {
+  const openAddModal = useCallback((recipientId = null) => {
     setPreselectedRecipientId(recipientId);
     setOnlyUnwrittenFilter(false);
     setIsAddModalOpen(true);
-  };
+  }, []);
 
-  const openCoverageAddModal = (recipientId = null) => {
+  const openCoverageAddModal = useCallback((recipientId = null) => {
     setPreselectedRecipientId(recipientId);
     setOnlyUnwrittenFilter(true);
     setIsAddModalOpen(true);
-  };
+  }, []);
 
-  const value = {
-    wing,
-    theme,
-    targetGunas,
-    currentUser,
-    isHydrated,
-    loginUser,
-    logoutUser,
-    karyakars: sortedKaryakars,
-    gunas,
-    isLoading,
-    totalWrittenCount,
-    myWrittenCount,
-    myWriterBadge,
-    writerLeaderboard,
-    myCoverageStats,
-    smartNudgeKaryakars,
-    // Modals & Drawers
-    isAddModalOpen,
-    setIsAddModalOpen,
-    preselectedRecipientId,
-    onlyUnwrittenFilter,
-    editingGuna,
-    setEditingGuna,
-    isEditNameModalOpen,
-    setIsEditNameModalOpen,
-    openEditNameModal: () => setIsEditNameModalOpen(true),
-    updateUserName,
-    openAddModal,
-    openCoverageAddModal,
-    handleGunaSubmitted,
-    handleSaveEditedGuna,
-    handleRajipoIncrement,
-    // Admin System Capabilities
-    adminSessionUnlocked,
-    isAdminUser,
-    unlockAdmin,
-    lockAdmin,
-    loginAsBhavikAdmin,
-    updateTargetCount,
-    deleteGuna,
-    adminEditGuna,
-    adminAddKaryakar,
-    adminUpdateKaryakar,
-    adminDeleteKaryakar,
-  };
+  const openEditNameModal = useCallback(() => {
+    setIsEditNameModalOpen(true);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      wing,
+      theme,
+      targetGunas,
+      currentUser,
+      isHydrated,
+      loginUser,
+      logoutUser,
+      karyakars: sortedKaryakars,
+      gunas,
+      isLoading,
+      totalWrittenCount,
+      myWrittenCount,
+      myWriterBadge,
+      writerLeaderboard,
+      myCoverageStats,
+      smartNudgeKaryakars,
+      // Modals & Drawers
+      isAddModalOpen,
+      setIsAddModalOpen,
+      preselectedRecipientId,
+      onlyUnwrittenFilter,
+      editingGuna,
+      setEditingGuna,
+      isEditNameModalOpen,
+      setIsEditNameModalOpen,
+      openEditNameModal,
+      updateUserName,
+      openAddModal,
+      openCoverageAddModal,
+      handleGunaSubmitted,
+      handleSaveEditedGuna,
+      handleRajipoIncrement,
+      // Admin System Capabilities
+      adminSessionUnlocked,
+      isAdminUser,
+      unlockAdmin,
+      lockAdmin,
+      loginAsBhavikAdmin,
+      updateTargetCount,
+      deleteGuna,
+      adminEditGuna,
+      adminAddKaryakar,
+      adminUpdateKaryakar,
+      adminDeleteKaryakar,
+    }),
+    [
+      wing,
+      theme,
+      targetGunas,
+      currentUser,
+      isHydrated,
+      loginUser,
+      logoutUser,
+      sortedKaryakars,
+      gunas,
+      isLoading,
+      totalWrittenCount,
+      myWrittenCount,
+      myWriterBadge,
+      writerLeaderboard,
+      myCoverageStats,
+      smartNudgeKaryakars,
+      isAddModalOpen,
+      preselectedRecipientId,
+      onlyUnwrittenFilter,
+      editingGuna,
+      isEditNameModalOpen,
+      openEditNameModal,
+      updateUserName,
+      openAddModal,
+      openCoverageAddModal,
+      handleGunaSubmitted,
+      handleSaveEditedGuna,
+      handleRajipoIncrement,
+      adminSessionUnlocked,
+      isAdminUser,
+      unlockAdmin,
+      lockAdmin,
+      loginAsBhavikAdmin,
+      updateTargetCount,
+      deleteGuna,
+      adminEditGuna,
+      adminAddKaryakar,
+      adminUpdateKaryakar,
+      adminDeleteKaryakar,
+    ]
+  );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

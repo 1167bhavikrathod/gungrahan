@@ -46,10 +46,10 @@ export default function HomePage() {
   const topThree = writerLeaderboard.slice(0, 3);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 space-y-5">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* 1. Welcome Card for Logged In User */}
       {currentUser && (
-        <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-amber-50/80 via-white to-orange-50/40 border border-amber-900/10 shadow-[0_4px_20px_-4px_rgba(180,83,9,0.05)] flex items-center justify-between gap-2 sm:gap-3">
+        <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-amber-50/80 via-white to-orange-50/40 border border-amber-900/10 shadow-sm flex items-center justify-between gap-2 sm:gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-xs text-amber-900/70 font-semibold font-gujarati">
               જય સ્વામિનારાયણ,

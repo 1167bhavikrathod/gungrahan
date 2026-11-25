@@ -151,7 +151,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/65">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Header Card */}
         <div
@@ -161,9 +161,9 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
               : 'bg-gradient-to-br from-rose-600 via-pink-700 to-rose-800 text-white'
           }`}
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-bold mb-2 border border-white/20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 text-xs font-bold mb-2 border border-white/20">
             <TilakChandlo className="w-4 h-4" />
-            <span className="font-gujarati text-amber-100">ગુણના ભિખારી બનીએ • રમતોત્સવ ૨૦૨૬</span>
+            <span className="font-gujarati text-amber-100">ગુણગ્રહણ મહોત્સવ • રમતોત્સવ ૨૦૨૬</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">ગુણગ્રહણ એપ</h1>
           <p className="text-xs text-amber-100/90 mt-0.5 max-w-xs mx-auto font-gujarati">

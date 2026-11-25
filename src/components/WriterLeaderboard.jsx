@@ -31,17 +31,14 @@ export default function WriterLeaderboard({
   return (
     <div className={`p-4 sm:p-5 rounded-3xl bg-white border ${theme.cardBorder} shadow-sm space-y-4`}>
       {/* Leaderboard Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+      <div className="flex items-start sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
             <Trophy className="w-4 h-4" />
           </div>
-          <div>
-            <h2 className="text-sm sm:text-base font-bold text-stone-900 font-gujarati flex items-center gap-1.5 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm sm:text-base font-bold text-stone-900 font-gujarati">
               ગુણ લેખક લીડરબોર્ડ
-              <span className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-bold">
-                ગુણના ભિખારી
-              </span>
             </h2>
             <p className="text-[11px] text-stone-500 font-gujarati">
               જેણે સૌથી વધુ ગુણ લખ્યા હોય તેમનો શ્રેષ્ઠ ક્રમ
@@ -49,7 +46,7 @@ export default function WriterLeaderboard({
           </div>
         </div>
 
-        <span className="text-xs text-slate-400 font-semibold">
+        <span className="text-xs text-slate-500 font-semibold shrink-0 whitespace-nowrap">
           {writerLeaderboard.length} લેખકો
         </span>
       </div>
