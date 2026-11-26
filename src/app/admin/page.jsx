@@ -28,6 +28,7 @@ import {
   Unlock,
   Eye,
   EyeOff,
+  UserCheck,
   CheckCircle2,
   ArrowLeft,
   ChevronRight,
