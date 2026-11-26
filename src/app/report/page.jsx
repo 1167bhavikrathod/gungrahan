@@ -7,7 +7,7 @@ import { getWriterBadge, formatRelativeTime } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 
 export default function ReportPage() {
-  const { gunas, karyakars, theme, wing } = useAppContext();
+  const { gunas, karyakars, theme, wing, activeProject } = useAppContext();
 
   const [viewMode, setViewMode] = useState('bapa-letter'); // 'bapa-letter' | 'chronological' | 'by-writer'
   const [isEditingLetter, setIsEditingLetter] = useState(false);
@@ -96,16 +96,17 @@ export default function ReportPage() {
     ]);
 
     const csvContent =
-      'data:text/csv;charset=utf-8,\uFEFF' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+      '\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
 
-    const encodedUri = encodeURI(csvContent);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', url);
     link.setAttribute('download', `Gunagrahan_Report_${wing}_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -187,7 +188,7 @@ export default function ReportPage() {
             પરમ પૂજ્ય મહંત સ્વામી મહારાજના ચરણોમાં ગુણગ્રહણ અર્ઘ્ય
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-600 font-gujarati">
-            રમતોત્સવ ૨૦૨૬ — ગુણગ્રહણ મહોત્સવ વિશેષ અહેવાલ ({theme.wingLabelGujarati})
+            {activeProject?.name || 'રમતોત્સવ ૨૦૨૬'} — ગુણગ્રહણ મહોત્સવ વિશેષ અહેવાલ ({theme.wingLabelGujarati})
           </p>
         </div>
 

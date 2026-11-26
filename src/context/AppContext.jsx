@@ -681,10 +681,29 @@ export function AppProvider({ children }) {
     setAdminSessionUnlocked(true);
   }, [loginUser]);
 
-  // Delete Guna Handler (Admin & Author)
+  // Register newly created karyakar into state immediately (avoids Realtime race)
+  const registerKaryakarInState = useCallback(
+    (newKaryakar) => {
+      if (!newKaryakar) return;
+      setKaryakars((prev) => {
+        if (prev.some((k) => k.id === newKaryakar.id)) return prev;
+        const updated = [...prev, newKaryakar];
+        try {
+          localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+    },
+    [wing]
+  );
+
+  // Delete Guna Handler (Admin & Author) — verifies Supabase delete and rolls back on failure
   const deleteGuna = useCallback(
     async (gunaId) => {
-      if (!gunaId) return false;
+      if (!gunaId) return { success: false, error: 'Guna ID missing' };
+
+      const targetGuna = gunas.find((g) => g.id === gunaId);
+
       setGunas((prev) => {
         const updated = prev.filter((g) => g.id !== gunaId);
         if (!isSupabaseConfigured) {
@@ -695,23 +714,49 @@ export function AppProvider({ children }) {
         return updated;
       });
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && isUuid(gunaId)) {
         try {
-          const { error } = await supabase.from('gunas').delete().eq('id', gunaId);
-          if (error) console.error('Failed to delete guna from Supabase:', error);
+          const { data, error } = await supabase
+            .from('gunas')
+            .delete()
+            .eq('id', gunaId)
+            .select('id');
+
+          if (error || !data || data.length === 0) {
+            const errMsg =
+              error?.message ||
+              'ડેટાબેઝમાંથી ગુણ ડિલીટ ન થયો (Supabase RLS DELETE policy તપાસો).';
+            console.error('Failed to delete guna from Supabase:', errMsg);
+            if (targetGuna) {
+              setGunas((prev) => {
+                if (prev.some((g) => g.id === targetGuna.id)) return prev;
+                return [targetGuna, ...prev].sort(
+                  (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+                );
+              });
+            }
+            return { success: false, error: errMsg };
+          }
         } catch (err) {
           console.error('Error deleting guna:', err);
+          if (targetGuna) {
+            setGunas((prev) => (prev.some((g) => g.id === targetGuna.id) ? prev : [targetGuna, ...prev]));
+          }
+          return { success: false, error: err?.message || 'Delete failed' };
         }
       }
-      return true;
+      return { success: true };
     },
-    [wing]
+    [gunas, wing]
   );
 
-  // Admin Edit Guna Handler
+  // Admin Edit Guna Handler — verifies Supabase update and rolls back on failure
   const adminEditGuna = useCallback(
     async (gunaId, updates) => {
-      if (!gunaId || !updates) return false;
+      if (!gunaId || !updates) return { success: false, error: 'Invalid update' };
+
+      const prevGuna = gunas.find((g) => g.id === gunaId);
+
       setGunas((prev) => {
         const updated = prev.map((g) => (g.id === gunaId ? { ...g, ...updates } : g));
         if (!isSupabaseConfigured) {
@@ -722,17 +767,35 @@ export function AppProvider({ children }) {
         return updated;
       });
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && isUuid(gunaId)) {
         try {
-          const { error } = await supabase.from('gunas').update(updates).eq('id', gunaId);
-          if (error) console.error('Failed to update guna in Supabase:', error);
+          const { data, error } = await supabase
+            .from('gunas')
+            .update(updates)
+            .eq('id', gunaId)
+            .select('id');
+
+          if (error || !data || data.length === 0) {
+            const errMsg =
+              error?.message ||
+              'ડેટાબેઝમાં ગુણ અપડેટ ન થયો (Supabase RLS UPDATE policy તપાસો).';
+            console.error('Failed to update guna in Supabase:', errMsg);
+            if (prevGuna) {
+              setGunas((prev) => prev.map((g) => (g.id === gunaId ? prevGuna : g)));
+            }
+            return { success: false, error: errMsg };
+          }
         } catch (err) {
           console.error('Error updating guna in Supabase:', err);
+          if (prevGuna) {
+            setGunas((prev) => prev.map((g) => (g.id === gunaId ? prevGuna : g)));
+          }
+          return { success: false, error: err?.message || 'Update failed' };
         }
       }
-      return true;
+      return { success: true };
     },
-    [wing]
+    [gunas, wing]
   );
 
   // Admin Add Karyakar Handler
@@ -741,6 +804,15 @@ export function AppProvider({ children }) {
       const cleanName = (newKaryakar.name || '').trim();
       const cleanNumber = (newKaryakar.karyakar_number || '').trim();
       if (!cleanName) return { success: false, error: 'નામ દાખલ કરવું જરૂરી છે.' };
+
+      const duplicate = karyakars.some(
+        (k) =>
+          (cleanNumber && String(k.karyakar_number || '').trim() === cleanNumber) ||
+          k.name.trim().toLowerCase() === cleanName.toLowerCase()
+      );
+      if (duplicate) {
+        return { success: false, error: 'આ નામ અથવા કાર્યકર નંબર પહેલેથી હાજર છે.' };
+      }
 
       const karyakarObj = {
         id:
@@ -756,47 +828,90 @@ export function AppProvider({ children }) {
         is_pre_registered: false,
       };
 
-      setKaryakars((prev) => {
-        if (
-          prev.some(
-            (k) =>
-              k.id === karyakarObj.id ||
-              (cleanNumber && k.karyakar_number === cleanNumber)
-          )
-        ) {
-          return prev;
-        }
-        const updated = [...prev, karyakarObj];
-        try {
-          localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(updated));
-        } catch (e) {}
-        return updated;
-      });
-
       if (isSupabaseConfigured) {
         try {
-          const { error } = await supabase.from('karyakars').insert([karyakarObj]);
-          if (error) console.error('Failed to insert karyakar in Supabase:', error);
+          let { data, error } = await supabase
+            .from('karyakars')
+            .insert([karyakarObj])
+            .select()
+            .single();
+
+          if (error && /(role|sabha)/i.test(error.message || '')) {
+            const { role: _r, sabha: _s, ...minimalObj } = karyakarObj;
+            const retryRes = await supabase
+              .from('karyakars')
+              .insert([minimalObj])
+              .select()
+              .single();
+            data = retryRes.data ? { ...karyakarObj, ...retryRes.data } : null;
+            error = retryRes.error;
+          }
+
+          if (error) {
+            console.error('Failed to insert karyakar in Supabase:', error);
+            return { success: false, error: error.message || 'કાર્યકર ઉમેરી શકાયો નહીં.' };
+          }
+          const saved = data || karyakarObj;
+          registerKaryakarInState(saved);
+          return { success: true, karyakar: saved };
         } catch (err) {
           console.error('Error inserting karyakar in Supabase:', err);
+          return { success: false, error: err?.message || 'કાર્યકર ઉમેરી શકાયો નહીં.' };
         }
       }
 
+      registerKaryakarInState(karyakarObj);
       return { success: true, karyakar: karyakarObj };
     },
-    [wing]
+    [karyakars, wing, registerKaryakarInState]
   );
 
-  // Admin Update Karyakar Handler
+  // Admin Update Karyakar Handler — verifies Supabase update and rolls back on failure
   const adminUpdateKaryakar = useCallback(
     async (karyakarId, updates) => {
-      if (!karyakarId || !updates) return false;
+      if (!karyakarId || !updates) return { success: false, error: 'Invalid update' };
 
-      let oldName = '';
+      const prevKaryakar = karyakars.find((k) => k.id === karyakarId);
+      const oldName = prevKaryakar?.name || '';
+
+      if (isSupabaseConfigured && isUuid(karyakarId)) {
+        try {
+          let { data, error } = await supabase
+            .from('karyakars')
+            .update(updates)
+            .eq('id', karyakarId)
+            .select('id');
+
+          if (error && /(role|sabha)/i.test(error.message || '')) {
+            const { role: _r, sabha: _s, ...minimalUpdates } = updates;
+            const retryRes = await supabase
+              .from('karyakars')
+              .update(minimalUpdates)
+              .eq('id', karyakarId)
+              .select('id');
+            data = retryRes.data;
+            error = retryRes.error;
+          }
+
+          if (error || !data || data.length === 0) {
+            const errMsg =
+              error?.message ||
+              'ડેટાબેઝમાં કાર્યકર અપડેટ ન થયો (Supabase RLS UPDATE policy તપાસો).';
+            console.error('Failed to update karyakar in Supabase:', errMsg);
+            return { success: false, error: errMsg };
+          }
+
+          if (updates.name && oldName && updates.name !== oldName) {
+            await supabase.from('gunas').update({ author_name: updates.name }).eq('author_id', karyakarId);
+            await supabase.from('gunas').update({ recipient_name: updates.name }).eq('recipient_id', karyakarId);
+          }
+        } catch (err) {
+          console.error('Error updating karyakar in Supabase:', err);
+          return { success: false, error: err?.message || 'Update failed' };
+        }
+      }
+
       setKaryakars((prev) => {
-        const existing = prev.find((k) => k.id === karyakarId);
-        if (existing) oldName = existing.name;
-
         const updated = prev.map((k) =>
           k.id === karyakarId ? { ...k, ...updates } : k
         );
@@ -806,7 +921,6 @@ export function AppProvider({ children }) {
         return updated;
       });
 
-      // If current user is this karyakar, update currentUser as well
       setCurrentUser((prevUser) => {
         if (prevUser && prevUser.id === karyakarId) {
           const updated = { ...prevUser, ...updates };
@@ -818,7 +932,6 @@ export function AppProvider({ children }) {
         return prevUser;
       });
 
-      // If name changed, propagate to gunas
       if (updates.name && oldName && updates.name !== oldName) {
         const newName = updates.name.trim();
         setGunas((prev) => {
@@ -844,29 +957,38 @@ export function AppProvider({ children }) {
         });
       }
 
-      if (isSupabaseConfigured) {
-        try {
-          const { error } = await supabase.from('karyakars').update(updates).eq('id', karyakarId);
-          if (error) console.error('Failed to update karyakar in Supabase:', error);
-
-          if (updates.name && oldName && updates.name !== oldName) {
-            await supabase.from('gunas').update({ author_name: updates.name }).eq('author_id', karyakarId);
-            await supabase.from('gunas').update({ recipient_name: updates.name }).eq('recipient_id', karyakarId);
-          }
-        } catch (err) {
-          console.error('Error updating karyakar in Supabase:', err);
-        }
-      }
-
-      return true;
+      return { success: true };
     },
-    [wing]
+    [karyakars, wing]
   );
 
-  // Admin Delete Karyakar Handler
+  // Admin Delete Karyakar Handler — verifies Supabase delete and rolls back on failure
   const adminDeleteKaryakar = useCallback(
     async (karyakarId) => {
-      if (!karyakarId) return false;
+      if (!karyakarId) return { success: false, error: 'Karyakar ID missing' };
+
+      const prevKaryakar = karyakars.find((k) => k.id === karyakarId);
+
+      if (isSupabaseConfigured && isUuid(karyakarId)) {
+        try {
+          const { data, error } = await supabase
+            .from('karyakars')
+            .delete()
+            .eq('id', karyakarId)
+            .select('id');
+
+          if (error || !data || data.length === 0) {
+            const errMsg =
+              error?.message ||
+              'ડેટાબેઝમાંથી કાર્યકર ડિલીટ ન થયો (Supabase RLS DELETE policy તપાસો).';
+            console.error('Failed to delete karyakar from Supabase:', errMsg);
+            return { success: false, error: errMsg };
+          }
+        } catch (err) {
+          console.error('Error deleting karyakar from Supabase:', err);
+          return { success: false, error: err?.message || 'Delete failed' };
+        }
+      }
 
       setKaryakars((prev) => {
         const updated = prev.filter((k) => k.id !== karyakarId);
@@ -876,18 +998,12 @@ export function AppProvider({ children }) {
         return updated;
       });
 
-      if (isSupabaseConfigured) {
-        try {
-          const { error } = await supabase.from('karyakars').delete().eq('id', karyakarId);
-          if (error) console.error('Failed to delete karyakar from Supabase:', error);
-        } catch (err) {
-          console.error('Error deleting karyakar from Supabase:', err);
-        }
-      }
+      // Remove cascaded gunas from local state as well
+      setGunas((prev) => prev.filter((g) => g.author_id !== karyakarId && g.recipient_id !== karyakarId));
 
-      return true;
+      return { success: true, deleted: prevKaryakar };
     },
-    [wing]
+    [karyakars, wing]
   );
 
   // Computed isAdminUser (strictly visible only when logged in as Bhavik)
@@ -1070,6 +1186,7 @@ export function AppProvider({ children }) {
       handleGunaSubmitted,
       handleSaveEditedGuna,
       handleRajipoIncrement,
+      registerKaryakarInState,
       // Admin System Capabilities
       adminSessionUnlocked,
       isAdminUser,
@@ -1120,6 +1237,7 @@ export function AppProvider({ children }) {
       handleGunaSubmitted,
       handleSaveEditedGuna,
       handleRajipoIncrement,
+      registerKaryakarInState,
       adminSessionUnlocked,
       isAdminUser,
       unlockAdmin,

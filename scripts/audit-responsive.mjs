@@ -90,20 +90,21 @@ async function runComprehensiveAudit() {
     const page = await browser.newPage();
     await page.setViewport({ width: vp.width, height: vp.height, deviceScaleFactor: 2 });
 
-    // Set logged-in state
+    // Set logged-in state (Bhavik Super Admin)
     await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.setItem(
         'gunagrahan_user_v1',
         JSON.stringify({
-          id: 'karyakar-1',
-          name: 'યોગેશભાઈ સોલંકી',
-          role: 'admin',
-          pin: '1907',
+          id: '1ccb1238-4241-4dbc-a933-b8db3696ca6b',
+          name: 'ભાવિક યોગેશભાઈ રાઠોડ',
+          karyakar_number: '13317',
+          role: 'સંચાલક',
+          sabha: 'શિવશક્તિ',
           wing: 'bal',
         })
       );
-      localStorage.setItem('gunagrahan_admin_unlocked_bal', 'true');
+      localStorage.setItem('gunagrahan_admin_unlocked_v1', 'true');
     });
 
     for (const route of ROUTES) {

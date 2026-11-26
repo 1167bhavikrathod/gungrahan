@@ -34,6 +34,7 @@ export default function AddGunaDrawer({
   activeProject,
   projectStatus,
   onGunaSubmitted,
+  onKaryakarCreated,
 }) {
   const [recipientId, setRecipientId] = useState(preselectedRecipientId || '');
   const [recipientSearch, setRecipientSearch] = useState('');
@@ -322,6 +323,9 @@ export default function AddGunaDrawer({
         };
       }
 
+      if (onKaryakarCreated) {
+        onKaryakarCreated(newRecip);
+      }
       setRecipientId(newRecip.id);
       setRecipientSearch('');
     } catch (err) {

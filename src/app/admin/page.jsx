@@ -429,24 +429,36 @@ export default function AdminPage() {
       rajipo_count: parseInt(editGunaForm.rajipo_count, 10) || 0,
     };
 
-    await adminEditGuna(editingGunaItem.id, updates);
-    setEditingGunaItem(null);
-    showToast('✨ ગુણ સફળતાપૂર્વક અપડેટ થયો!');
+    const res = await adminEditGuna(editingGunaItem.id, updates);
+    if (res?.success) {
+      setEditingGunaItem(null);
+      showToast('✨ ગુણ સફળતાપૂર્વક અપડેટ થયો!');
+    } else {
+      showToast(`❌ ${res?.error || 'ગુણ અપડેટ કરવામાં ભૂલ આવી.'}`);
+    }
   };
 
   // Handle Delete Guna
   const handleConfirmDeleteGuna = async () => {
     if (!gunaToDelete) return;
-    await deleteGuna(gunaToDelete.id);
+    const res = await deleteGuna(gunaToDelete.id);
     setGunaToDelete(null);
-    showToast('🗑️ ગુણ સફળતાપૂર્વક ડિલીટ થયો.');
+    if (res?.success) {
+      showToast('🗑️ ગુણ સફળતાપૂર્વક ડિલીટ થયો.');
+    } else {
+      showToast(`❌ ${res?.error || 'ગુણ ડિલીટ કરવામાં ભૂલ આવી.'}`);
+    }
   };
 
   // Handle Boost Rajipo
-  const handleBoostRajipo = (guna) => {
+  const handleBoostRajipo = async (guna) => {
     const current = guna.rajipo_count || 0;
-    adminEditGuna(guna.id, { rajipo_count: current + 1 });
-    showToast(`❤️ રાજીપો વધાર્યો (+1)`);
+    const res = await adminEditGuna(guna.id, { rajipo_count: current + 1 });
+    if (res?.success) {
+      showToast(`❤️ રાજીપો વધાર્યો (+1)`);
+    } else {
+      showToast(`❌ ${res?.error || 'રાજીપો અપડેટ ન થયો.'}`);
+    }
   };
 
   // Handle Add New Karyakar
@@ -499,17 +511,25 @@ export default function AdminPage() {
       sabha: editKaryakarForm.sabha.trim(),
     };
 
-    await adminUpdateKaryakar(editingKaryakarItem.id, updates);
-    setEditingKaryakarItem(null);
-    showToast(`✨ કાર્યકર વિગતો અપડેટ થઈ ગઈ!`);
+    const res = await adminUpdateKaryakar(editingKaryakarItem.id, updates);
+    if (res?.success) {
+      setEditingKaryakarItem(null);
+      showToast(`✨ કાર્યકર વિગતો અપડેટ થઈ ગઈ!`);
+    } else {
+      showToast(`❌ ${res?.error || 'કાર્યકર અપડેટ કરવામાં ભૂલ આવી.'}`);
+    }
   };
 
   // Handle Delete Karyakar
   const handleConfirmDeleteKaryakar = async () => {
     if (!karyakarToDelete) return;
-    await adminDeleteKaryakar(karyakarToDelete.id);
+    const res = await adminDeleteKaryakar(karyakarToDelete.id);
     setKaryakarToDelete(null);
-    showToast(`🗑️ કાર્યકર યાદીમાંથી દૂર કરવામાં આવ્યા.`);
+    if (res?.success) {
+      showToast(`🗑️ કાર્યકર યાદીમાંથી દૂર કરવામાં આવ્યા.`);
+    } else {
+      showToast(`❌ ${res?.error || 'કાર્યકર ડિલીટ કરવામાં ભૂલ આવી.'}`);
+    }
   };
 
   // Fast Switch to User
@@ -1318,12 +1338,23 @@ export default function AdminPage() {
                   <button
                     key={k.id}
                     onClick={() => openAddModal(k.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-stone-800 text-xs font-bold font-gujarati border border-amber-300 shadow-2xs transition active:scale-95"
-                    title={`${k.name} માટે ગુણ લખો`}
+                    disabled={projectStatus?.isSubmissionClosed}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-stone-800 text-xs font-bold font-gujarati border border-amber-300 shadow-2xs transition ${
+                      projectStatus?.isSubmissionClosed
+                        ? 'opacity-60 cursor-not-allowed'
+                        : 'hover:bg-amber-100 active:scale-95'
+                    }`}
+                    title={
+                      projectStatus?.isSubmissionClosed
+                        ? 'પ્રોજેક્ટ બંધ છે'
+                        : `${k.name} માટે ગુણ લખો`
+                    }
                   >
                     <span>{k.name}</span>
                     <span className="text-[10px] text-stone-400">({k.sabha})</span>
-                    <Plus className="w-3.5 h-3.5 text-amber-600" />
+                    {!projectStatus?.isSubmissionClosed && (
+                      <Plus className="w-3.5 h-3.5 text-amber-600" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -1731,7 +1762,7 @@ export default function AdminPage() {
       {/* MODAL 1: ADD NEW KARYAKAR MODAL                         */}
       {/* ======================================================== */}
       {isAddKaryakarOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60">
           <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[90vh]">
             <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
@@ -1839,7 +1870,7 @@ export default function AdminPage() {
       {/* MODAL 2: EDIT KARYAKAR MODAL                            */}
       {/* ======================================================== */}
       {editingKaryakarItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60">
           <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[90vh]">
             <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
@@ -1941,7 +1972,7 @@ export default function AdminPage() {
       {/* MODAL 3: DELETE KARYAKAR CONFIRMATION                    */}
       {/* ======================================================== */}
       {karyakarToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60">
           <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-amber-900/15 p-5 text-center space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 mx-auto flex items-center justify-center">
               <Trash2 className="w-6 h-6" />
@@ -1979,7 +2010,7 @@ export default function AdminPage() {
       {/* MODAL 4: EDIT GUNA MODAL                                */}
       {/* ======================================================== */}
       {editingGunaItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60">
           <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-amber-900/15 overflow-hidden flex flex-col max-h-[90vh]">
             <div className="bg-gradient-to-r from-amber-600 to-amber-700 p-4 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
@@ -2077,7 +2108,7 @@ export default function AdminPage() {
       {/* MODAL 5: DELETE GUNA CONFIRMATION                        */}
       {/* ======================================================== */}
       {gunaToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60">
           <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-amber-900/15 p-5 text-center space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 mx-auto flex items-center justify-center">
               <Trash2 className="w-6 h-6" />

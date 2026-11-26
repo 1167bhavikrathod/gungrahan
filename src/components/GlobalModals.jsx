@@ -30,6 +30,7 @@ export default function GlobalModals() {
     updateUserName,
     activeProject,
     projectStatus,
+    registerKaryakarInState,
   } = useAppContext();
 
   return (
@@ -59,6 +60,7 @@ export default function GlobalModals() {
         activeProject={activeProject}
         projectStatus={projectStatus}
         onGunaSubmitted={handleGunaSubmitted}
+        onKaryakarCreated={registerKaryakarInState}
       />
 
       {/* Edit Guna Modal */}

@@ -16,6 +16,11 @@ function GunaCard({
   const [hasLiked, setHasLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(guna.rajipo_count || 0);
 
+  // Keep displayed count synced with realtime/admin updates
+  useEffect(() => {
+    setLikeCount(guna.rajipo_count || 0);
+  }, [guna.rajipo_count]);
+
   // Sync like state from localStorage on client mount to avoid hydration mismatch
   useEffect(() => {
     try {
@@ -32,8 +37,9 @@ function GunaCard({
   const handleRajipo = async () => {
     if (hasLiked) return;
 
+    const nextCount = (guna.rajipo_count || 0) + 1;
     setHasLiked(true);
-    setLikeCount((prev) => prev + 1);
+    setLikeCount(nextCount);
 
     try {
       const likedList = JSON.parse(localStorage.getItem('gunagrahan_liked_ids') || '[]');
@@ -43,7 +49,10 @@ function GunaCard({
       }
 
       if (isSupabaseConfigured) {
-        await supabase.rpc('increment_rajipo', { row_id: guna.id });
+        const { error: rpcError } = await supabase.rpc('increment_rajipo', { row_id: guna.id });
+        if (rpcError) {
+          await supabase.from('gunas').update({ rajipo_count: nextCount }).eq('id', guna.id);
+        }
       }
 
       if (onRajipoIncrement) {

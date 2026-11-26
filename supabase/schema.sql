@@ -70,21 +70,29 @@ alter table public.projects enable row level security;
 -- Drop existing policies if re-running
 drop policy if exists "Allow public read karyakars" on public.karyakars;
 drop policy if exists "Allow public insert karyakars" on public.karyakars;
+drop policy if exists "Allow public update karyakars" on public.karyakars;
+drop policy if exists "Allow public delete karyakars" on public.karyakars;
 drop policy if exists "Allow public read gunas" on public.gunas;
 drop policy if exists "Allow public insert gunas" on public.gunas;
 drop policy if exists "Allow public update rajipo_count" on public.gunas;
+drop policy if exists "Allow public delete gunas" on public.gunas;
 drop policy if exists "Allow public read projects" on public.projects;
 drop policy if exists "Allow public insert projects" on public.projects;
 drop policy if exists "Allow public update projects" on public.projects;
+drop policy if exists "Allow public delete projects" on public.projects;
 
 create policy "Allow public read karyakars" on public.karyakars for select using (true);
 create policy "Allow public insert karyakars" on public.karyakars for insert with check (true);
+create policy "Allow public update karyakars" on public.karyakars for update using (true);
+create policy "Allow public delete karyakars" on public.karyakars for delete using (true);
 create policy "Allow public read gunas" on public.gunas for select using (true);
 create policy "Allow public insert gunas" on public.gunas for insert with check (true);
 create policy "Allow public update rajipo_count" on public.gunas for update using (true);
+create policy "Allow public delete gunas" on public.gunas for delete using (true);
 create policy "Allow public read projects" on public.projects for select using (true);
 create policy "Allow public insert projects" on public.projects for insert with check (true);
 create policy "Allow public update projects" on public.projects for update using (true);
+create policy "Allow public delete projects" on public.projects for delete using (true);
 
 -- 6. ENABLE REALTIME WEBSOCKETS (Safe idempotent block)
 do $pub$
