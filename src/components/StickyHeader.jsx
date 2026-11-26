@@ -14,6 +14,7 @@ import {
   Trophy,
   Target,
   Pencil,
+  KeyRound,
   Crown,
 } from 'lucide-react';
 import { getFirstGrapheme } from '@/lib/utils';
@@ -29,6 +30,7 @@ export default function StickyHeader() {
     theme,
     logoutUser,
     openEditNameModal,
+    openChangePasswordModal,
     isAdminUser,
   } = useAppContext();
 
@@ -228,6 +230,17 @@ export default function StickyHeader() {
                   >
                     <Pencil className="w-4 h-4 text-amber-600" />
                     <span>તમારું નામ સુધારો</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      openChangePasswordModal();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition text-left font-bold"
+                  >
+                    <KeyRound className="w-4 h-4 text-indigo-600" />
+                    <span>પાસવર્ડ / નંબર બદલો</span>
                   </button>
 
                   <button

@@ -72,7 +72,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
       if (cleanInput === expectedNumber) {
         onSelectUser(selectedKaryakar);
       } else {
-        setErrorMessage('ખોટો કાર્યકર નંબર! કૃપા કરીને તમારો સત્તાવાર નંબર દાખલ કરો.');
+        setErrorMessage('ખોટો પાસવર્ડ / કાર્યકર નંબર! કૃપા કરીને સાચો પાસવર્ડ દાખલ કરો.');
         setPasswordInput('');
       }
     } else {
@@ -233,7 +233,6 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
                   id="karyakar-password-input"
                   ref={passwordInputRef}
                   type={showPassword ? 'text' : 'password'}
-                  inputMode="numeric"
                   value={passwordInput}
                   onChange={(e) => {
                     setPasswordInput(e.target.value);
@@ -254,7 +253,7 @@ export default function LoginGateModal({ karyakars = [], onSelectUser, wing, the
               </div>
 
               <p className="text-[11px] text-stone-500 font-gujarati text-center">
-                ક્ષેત્ર ૨૧ ના સત્તાવાર લિસ્ટ મુજબનો કાર્યકર નંબર
+                તમારો કાર્યકર નંબર અથવા બદલેલો નવો પાસવર્ડ દાખલ કરો
               </p>
             </div>
 

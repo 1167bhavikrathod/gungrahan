@@ -26,10 +26,7 @@ export const MASTER_ADMIN_PINS = [
 export function isAdmin(user) {
   if (!user) return false;
 
-  return (
-    user.id === BHAVIK_ADMIN_INFO.id &&
-    String(user.karyakar_number || '').trim() === BHAVIK_ADMIN_INFO.karyakar_number
-  );
+  return user.id === BHAVIK_ADMIN_INFO.id;
 }
 
 /**

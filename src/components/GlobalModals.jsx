@@ -5,6 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import AddGunaDrawer from '@/components/AddGunaDrawer';
 import EditGunaModal from '@/components/EditGunaModal';
 import EditNameModal from '@/components/EditNameModal';
+import ChangePasswordModal from '@/components/ChangePasswordModal';
 import LoginGateModal from '@/components/LoginGateModal';
 
 export default function GlobalModals() {
@@ -28,6 +29,9 @@ export default function GlobalModals() {
     isEditNameModalOpen,
     setIsEditNameModalOpen,
     updateUserName,
+    isChangePasswordModalOpen,
+    setIsChangePasswordModalOpen,
+    updateUserPassword,
     activeProject,
     projectStatus,
     registerKaryakarInState,
@@ -78,6 +82,15 @@ export default function GlobalModals() {
         onClose={() => setIsEditNameModalOpen(false)}
         currentUser={currentUser}
         onSave={updateUserName}
+        theme={theme}
+      />
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        currentUser={currentUser}
+        onSave={updateUserPassword}
         theme={theme}
       />
     </>

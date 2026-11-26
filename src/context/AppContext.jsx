@@ -68,6 +68,7 @@ export function AppProvider({ children }) {
   const [onlyUnwrittenFilter, setOnlyUnwrittenFilter] = useState(false);
   const [editingGuna, setEditingGuna] = useState(null);
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
   // 1. Initial LocalStorage Hydration
   useEffect(() => {
@@ -438,6 +439,100 @@ export function AppProvider({ children }) {
       return true;
     },
     [currentUser, karyakars, gunas, wing]
+  );
+
+  // Update Current User Password Handler — verifies current password, updates Supabase, rolls back on failure
+  const updateUserPassword = useCallback(
+    async (currentPassword, newPassword) => {
+      if (!currentUser) {
+        return { success: false, error: 'કૃપા કરીને પહેલા લોગિન કરો.' };
+      }
+
+      const cleanNew = String(newPassword || '').trim();
+      const cleanCurrent = String(currentPassword || '').trim();
+      if (cleanNew.length < 3) {
+        return { success: false, error: 'નવો પાસવર્ડ ઓછામાં ઓછા ૩ અક્ષર/અંકનો હોવો જોઈએ.' };
+      }
+
+      const liveRecord = karyakars.find((k) => k.id === currentUser.id) || currentUser;
+      const expectedCurrent = String(liveRecord?.karyakar_number || '').trim();
+      if (expectedCurrent && cleanCurrent !== expectedCurrent) {
+        return { success: false, error: 'હાલનો પાસવર્ડ (કાર્યકર નંબર) ખોટો છે.' };
+      }
+
+      const prevUser = currentUser;
+      const prevKaryakars = karyakars;
+      const updatedUser = { ...currentUser, karyakar_number: cleanNew };
+
+      const rollbackPassword = () => {
+        setCurrentUser(prevUser);
+        try {
+          localStorage.setItem('gunagrahan_user_v1', JSON.stringify(prevUser));
+        } catch (e) {}
+        setKaryakars(prevKaryakars);
+        if (!isSupabaseConfigured) {
+          try {
+            localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(prevKaryakars));
+          } catch (e) {}
+        }
+      };
+
+      setCurrentUser(updatedUser);
+      try {
+        localStorage.setItem('gunagrahan_user_v1', JSON.stringify(updatedUser));
+      } catch (e) {}
+
+      setKaryakars((prev) => {
+        const next = prev.map((k) =>
+          k.id === currentUser.id ? { ...k, karyakar_number: cleanNew } : k
+        );
+        if (!isSupabaseConfigured) {
+          try {
+            localStorage.setItem(`gunagrahan_karyakars_custom_${wing}`, JSON.stringify(next));
+          } catch (e) {}
+        }
+        return next;
+      });
+
+      if (isSupabaseConfigured) {
+        try {
+          if (isUuid(currentUser.id)) {
+            const { data, error } = await supabase
+              .from('karyakars')
+              .update({ karyakar_number: cleanNew })
+              .eq('id', currentUser.id)
+              .select('id, karyakar_number');
+
+            if (error || !data || data.length === 0) {
+              const errMsg =
+                error?.message ||
+                'ડેટાબેઝમાં પાસવર્ડ અપડેટ ન થયો (Supabase RLS UPDATE policy તપાસો).';
+              console.error('Failed to update password in Supabase:', errMsg);
+              rollbackPassword();
+              return { success: false, error: errMsg };
+            }
+          } else if (currentUser.name) {
+            const { error } = await supabase
+              .from('karyakars')
+              .update({ karyakar_number: cleanNew })
+              .eq('name', currentUser.name);
+
+            if (error) {
+              console.error('Failed to update password by name in Supabase:', error.message);
+              rollbackPassword();
+              return { success: false, error: error.message };
+            }
+          }
+        } catch (err) {
+          console.error('Failed to update password:', err);
+          rollbackPassword();
+          return { success: false, error: err?.message || 'પાસવર્ડ બદલવામાં મુશ્કેલી થઈ.' };
+        }
+      }
+
+      return { success: true };
+    },
+    [currentUser, karyakars, wing]
   );
 
   // Guna Submitted Handler
@@ -1226,6 +1321,10 @@ export function AppProvider({ children }) {
     setIsEditNameModalOpen(true);
   }, []);
 
+  const openChangePasswordModal = useCallback(() => {
+    setIsChangePasswordModalOpen(true);
+  }, []);
+
   const value = useMemo(
     () => ({
       wing,
@@ -1260,6 +1359,10 @@ export function AppProvider({ children }) {
       setIsEditNameModalOpen,
       openEditNameModal,
       updateUserName,
+      isChangePasswordModalOpen,
+      setIsChangePasswordModalOpen,
+      openChangePasswordModal,
+      updateUserPassword,
       openAddModal,
       openCoverageAddModal,
       handleGunaSubmitted,
@@ -1311,6 +1414,9 @@ export function AppProvider({ children }) {
       isEditNameModalOpen,
       openEditNameModal,
       updateUserName,
+      isChangePasswordModalOpen,
+      openChangePasswordModal,
+      updateUserPassword,
       openAddModal,
       openCoverageAddModal,
       handleGunaSubmitted,
