@@ -14,6 +14,7 @@ export default function EditGunaModal({
 }) {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
 
@@ -28,9 +29,11 @@ export default function EditGunaModal({
     if (guna && isOpen) {
       const initial = guna.content || '';
       setContent(initial);
+      setErrorMessage('');
       finalTranscriptRef.current = initial.trim();
     } else {
       setContent('');
+      setErrorMessage('');
       stopVoiceRecording();
       finalTranscriptRef.current = '';
     }
@@ -235,14 +238,20 @@ export default function EditGunaModal({
 
     stopVoiceRecording();
     setIsSubmitting(true);
+    setErrorMessage('');
     try {
-      await onSave({
+      const res = await onSave({
         ...guna,
         content: content.trim(),
       });
+      if (res === false || res?.success === false) {
+        setErrorMessage(res?.error || 'ગુણ અપડેટ કરવામાં મુશ્કેલી થઈ. ફરી પ્રયાસ કરો.');
+        return;
+      }
       onClose();
     } catch (err) {
       console.error('Error updating guna:', err);
+      setErrorMessage(err?.message || 'ગુણ અપડેટ કરવામાં મુશ્કેલી થઈ.');
     } finally {
       setIsSubmitting(false);
     }
@@ -360,11 +369,18 @@ export default function EditGunaModal({
               onChange={(e) => {
                 setContent(e.target.value);
                 finalTranscriptRef.current = e.target.value;
+                if (errorMessage) setErrorMessage('');
               }}
               className="w-full p-3.5 bg-stone-50/80 border border-stone-200 rounded-2xl text-sm font-gujarati text-stone-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 shadow-2xs"
               required
             />
           </div>
+
+          {errorMessage && (
+            <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 font-gujarati">
+              ❌ {errorMessage}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="pt-2 flex items-center gap-2.5">

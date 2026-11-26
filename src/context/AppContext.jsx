@@ -317,15 +317,27 @@ export function AppProvider({ children }) {
     } catch (e) {}
   }, []);
 
-  // Update Current User Name Handler
+  // Update Current User Name Handler — verifies Supabase update and rolls back on failure
   const updateUserName = useCallback(
     async (newName) => {
       const trimmed = newName.trim();
       if (!trimmed || !currentUser) return false;
       if (trimmed === currentUser.name) return true;
 
+      const prevUser = currentUser;
+      const prevKaryakars = karyakars;
+      const prevGunas = gunas;
       const oldName = currentUser.name;
       const updatedUser = { ...currentUser, name: trimmed };
+
+      const rollbackLocal = () => {
+        setCurrentUser(prevUser);
+        try {
+          localStorage.setItem('gunagrahan_user_v1', JSON.stringify(prevUser));
+        } catch (e) {}
+        setKaryakars(prevKaryakars);
+        setGunas(prevGunas);
+      };
 
       // 1. Update currentUser in state & localStorage
       setCurrentUser(updatedUser);
@@ -366,14 +378,24 @@ export function AppProvider({ children }) {
         return updatedGunas;
       });
 
-      // 4. Update Supabase if configured
+      // 4. Update Supabase if configured and verify rows affected
       if (isSupabaseConfigured) {
         try {
-          if (currentUser.id) {
-            await supabase
+          if (isUuid(currentUser.id)) {
+            const { data, error } = await supabase
               .from('karyakars')
               .update({ name: trimmed })
-              .eq('id', currentUser.id);
+              .eq('id', currentUser.id)
+              .select('id');
+
+            if (error || !data || data.length === 0) {
+              console.error(
+                'Failed to update user name in Supabase:',
+                error?.message || 'No karyakar rows updated (check RLS UPDATE policy)'
+              );
+              rollbackLocal();
+              return false;
+            }
 
             await supabase
               .from('gunas')
@@ -384,11 +406,17 @@ export function AppProvider({ children }) {
               .from('gunas')
               .update({ recipient_name: trimmed })
               .eq('recipient_id', currentUser.id);
-          } else {
-            await supabase
+          } else if (oldName) {
+            const { error } = await supabase
               .from('karyakars')
               .update({ name: trimmed })
               .eq('name', oldName);
+
+            if (error) {
+              console.error('Failed to update user name by name in Supabase:', error.message);
+              rollbackLocal();
+              return false;
+            }
 
             await supabase
               .from('gunas')
@@ -402,12 +430,14 @@ export function AppProvider({ children }) {
           }
         } catch (err) {
           console.error('Failed to sync updated name to Supabase:', err);
+          rollbackLocal();
+          return false;
         }
       }
 
       return true;
     },
-    [currentUser, wing]
+    [currentUser, karyakars, gunas, wing]
   );
 
   // Guna Submitted Handler
@@ -427,33 +457,56 @@ export function AppProvider({ children }) {
     [wing]
   );
 
-  // Guna Edited Handler
+  // Guna Edited Handler — verifies Supabase update and rolls back on failure
   const handleSaveEditedGuna = useCallback(
     async (updatedGuna) => {
+      if (!updatedGuna?.id) return { success: false, error: 'Invalid guna item' };
+
+      const prevGuna = gunas.find((g) => g.id === updatedGuna.id);
+      const nextContent = (updatedGuna.content || '').trim();
+      if (nextContent.length < 3) {
+        return { success: false, error: 'ગુણ ઓછામાં ઓછા ૩ અક્ષરનો હોવો જોઈએ.' };
+      }
+
       setGunas((prev) =>
-        prev.map((g) => (g.id === updatedGuna.id ? { ...g, content: updatedGuna.content } : g))
+        prev.map((g) => (g.id === updatedGuna.id ? { ...g, content: nextContent } : g))
       );
 
       try {
-        if (isSupabaseConfigured) {
-          const { error } = await supabase
+        if (isSupabaseConfigured && isUuid(updatedGuna.id)) {
+          const { data, error } = await supabase
             .from('gunas')
-            .update({ content: updatedGuna.content })
-            .eq('id', updatedGuna.id);
+            .update({ content: nextContent })
+            .eq('id', updatedGuna.id)
+            .select('id');
 
-          if (error) console.error('Failed to update guna in Supabase:', error);
-        } else {
+          if (error || !data || data.length === 0) {
+            const errMsg =
+              error?.message ||
+              'ડેટાબેઝમાં ગુણ અપડેટ ન થયો (Supabase RLS UPDATE policy તપાસો).';
+            console.error('Failed to update guna in Supabase:', errMsg);
+            if (prevGuna) {
+              setGunas((prev) => prev.map((g) => (g.id === updatedGuna.id ? prevGuna : g)));
+            }
+            return { success: false, error: errMsg };
+          }
+        } else if (!isSupabaseConfigured) {
           const stored = JSON.parse(localStorage.getItem(`gunagrahan_gunas_${wing}`) || '[]');
           const updated = stored.map((g) =>
-            g.id === updatedGuna.id ? { ...g, content: updatedGuna.content } : g
+            g.id === updatedGuna.id ? { ...g, content: nextContent } : g
           );
           localStorage.setItem(`gunagrahan_gunas_${wing}`, JSON.stringify(updated));
         }
+        return { success: true };
       } catch (err) {
         console.error('Error saving updated guna:', err);
+        if (prevGuna) {
+          setGunas((prev) => prev.map((g) => (g.id === updatedGuna.id ? prevGuna : g)));
+        }
+        return { success: false, error: err?.message || 'ગુણ અપડેટ કરવામાં મુશ્કેલી થઈ.' };
       }
     },
-    [wing]
+    [gunas, wing]
   );
 
   // Rajipo Increment Handler
@@ -489,7 +542,10 @@ export function AppProvider({ children }) {
   // Update Active Project (Name, Subtitle, Target, Deadline, Closed state)
   const updateActiveProject = useCallback(
     async (updates) => {
-      if (!updates || !activeProject) return false;
+      if (!updates || !activeProject) return { success: false, error: 'Invalid project update' };
+
+      const prevProjects = projects;
+      const prevTargetGunas = targetGunas;
 
       if (updates.target_gunas) {
         const parsedTarget = parseInt(updates.target_gunas, 10);
@@ -511,14 +567,31 @@ export function AppProvider({ children }) {
         return next;
       });
 
+      const rollbackProject = () => {
+        setProjects(prevProjects);
+        persistProjectsLocal(prevProjects);
+        setTargetGunas(prevTargetGunas);
+        try {
+          localStorage.setItem(`gunagrahan_target_gunas_${wing}`, String(prevTargetGunas));
+        } catch (e) {}
+      };
+
       if (isSupabaseConfigured && hasProjectsTable) {
         try {
           if (isUuid(activeProject.id)) {
-            const { error } = await supabase
+            const { data, error } = await supabase
               .from('projects')
               .update(updates)
-              .eq('id', activeProject.id);
-            if (error) console.error('Failed to update project in Supabase:', error);
+              .eq('id', activeProject.id)
+              .select('id');
+            if (error || !data || data.length === 0) {
+              const errMsg =
+                error?.message ||
+                'ડેટાબેઝમાં પ્રોજેક્ટ અપડેટ ન થયો (Supabase RLS UPDATE policy તપાસો).';
+              console.error('Failed to update project in Supabase:', errMsg);
+              rollbackProject();
+              return { success: false, error: errMsg };
+            }
           } else {
             const insertPayload = {
               name: mergedProject.name || 'રમતોત્સવ ૨૦૨૬',
@@ -534,22 +607,28 @@ export function AppProvider({ children }) {
               .insert(insertPayload)
               .select()
               .single();
-            if (!error && data) {
-              setProjects((prev) => {
-                const next = prev.map((p) => (p.id === activeProject.id ? data : p));
-                persistProjectsLocal(next);
-                return next;
-              });
+            if (error || !data) {
+              const errMsg = error?.message || 'પ્રોજેક્ટ ડેટાબેઝમાં સાચવી શકાયો નહીં.';
+              console.error('Failed to insert project in Supabase:', errMsg);
+              rollbackProject();
+              return { success: false, error: errMsg };
             }
+            setProjects((prev) => {
+              const next = prev.map((p) => (p.id === activeProject.id ? data : p));
+              persistProjectsLocal(next);
+              return next;
+            });
           }
         } catch (err) {
           console.error('Error updating project in Supabase:', err);
+          rollbackProject();
+          return { success: false, error: err?.message || 'પ્રોજેક્ટ અપડેટ નિષ્ફળ ગયો.' };
         }
       }
 
-      return true;
+      return { success: true };
     },
-    [activeProject, wing, hasProjectsTable, persistProjectsLocal]
+    [activeProject, projects, targetGunas, wing, hasProjectsTable, persistProjectsLocal]
   );
 
   // Create & Switch to a New Project (keeps previous project's gunas archived)
@@ -656,10 +735,10 @@ export function AppProvider({ children }) {
 
   // Target Count Updater
   const updateTargetCount = useCallback(
-    (newTarget) => {
+    async (newTarget) => {
       const count = parseInt(newTarget, 10);
-      if (isNaN(count) || count <= 0) return;
-      updateActiveProject({ target_gunas: count });
+      if (isNaN(count) || count <= 0) return { success: false, error: 'માન્ય સંખ્યા દાખલ કરો.' };
+      return await updateActiveProject({ target_gunas: count });
     },
     [updateActiveProject]
   );

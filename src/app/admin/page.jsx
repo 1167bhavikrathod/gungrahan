@@ -179,24 +179,32 @@ export default function AdminPage() {
       ? new Date(projectForm.deadlineLocal).toISOString()
       : null;
 
-    await updateActiveProject({
+    const res = await updateActiveProject({
       name: cleanName,
       subtitle: projectForm.subtitle.trim(),
       deadline_at: deadlineIso,
     });
-    setIsEditingProject(false);
-    showToast('📅 પ્રોજેક્ટ અને ડેડલાઇન અપડેટ થઈ ગઈ!');
+    if (res?.success) {
+      setIsEditingProject(false);
+      showToast('📅 પ્રોજેક્ટ અને ડેડલાઇન અપડેટ થઈ ગઈ!');
+    } else {
+      showToast(`❌ ${res?.error || 'પ્રોજેક્ટ અપડેટ કરવામાં ભૂલ આવી.'}`);
+    }
   };
 
   // Toggle Manual Project Close/Reopen
   const handleToggleProjectClosed = async () => {
     const nextClosed = !activeProject?.is_closed;
-    await updateActiveProject({ is_closed: nextClosed });
-    showToast(
-      nextClosed
-        ? '🔒 પ્રોજેક્ટ બંધ કરવામાં આવ્યો (હવે ફક્ત વાંચી શકાય).'
-        : '🔓 પ્રોજેક્ટ ફરી ખુલ્લો મૂકવામાં આવ્યો!'
-    );
+    const res = await updateActiveProject({ is_closed: nextClosed });
+    if (res?.success) {
+      showToast(
+        nextClosed
+          ? '🔒 પ્રોજેક્ટ બંધ કરવામાં આવ્યો (હવે ફક્ત વાંચી શકાય).'
+          : '🔓 પ્રોજેક્ટ ફરી ખુલ્લો મૂકવામાં આવ્યો!'
+      );
+    } else {
+      showToast(`❌ ${res?.error || 'પ્રોજેક્ટ સ્થિતિ અપડેટ ન થઈ.'}`);
+    }
   };
 
   // Create & Switch to a New Project
@@ -248,16 +256,20 @@ export default function AdminPage() {
   };
 
   // Save Target Count
-  const handleSaveTarget = (e) => {
+  const handleSaveTarget = async (e) => {
     e.preventDefault();
     const count = parseInt(newTargetInput, 10);
     if (isNaN(count) || count <= 0) {
       showToast('કૃપા કરીને માન્ય સંખ્યા દાખલ કરો.');
       return;
     }
-    updateTargetCount(count);
-    setIsEditingTarget(false);
-    showToast(`🎯 ગુણ લક્ષ્યાંક અપડેટ થઈને ${count} થયો!`);
+    const res = await updateTargetCount(count);
+    if (res?.success) {
+      setIsEditingTarget(false);
+      showToast(`🎯 ગુણ લક્ષ્યાંક અપડેટ થઈને ${count} થયો!`);
+    } else {
+      showToast(`❌ ${res?.error || 'લક્ષ્યાંક અપડેટ કરવામાં ભૂલ આવી.'}`);
+    }
   };
 
   // Sabha Options from existing karyakars

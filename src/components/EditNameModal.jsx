@@ -16,9 +16,10 @@ export default function EditNameModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef(null);
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen && currentUser) {
+    if (isOpen && !wasOpenRef.current && currentUser) {
       setNameInput(currentUser.name || '');
       setErrorMessage('');
       setIsSuccess(false);
@@ -30,6 +31,7 @@ export default function EditNameModal({
         }
       }, 100);
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen, currentUser]);
 
   if (!isOpen || !currentUser) return null;
